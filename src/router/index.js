@@ -16,6 +16,14 @@ const router = createRouter({
           path: 'searchmajor',
           component: () => import('../views/Layout/components/MainComponent/SearchMajor.vue')
         },
+        {
+          path: 'my',
+          component: () => import('../views/Layout/components/MainComponent/My.vue'),
+          children: [{
+            path: 'myinfo',
+            component: () => import('../views/Layout/components/MainComponent/MyComponent/MyInfo.vue')
+          }]
+        },
       ]
     },
     {

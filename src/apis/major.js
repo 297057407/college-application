@@ -29,3 +29,21 @@ export const getByTagsApi = (data) => {
         data
     })
 }
+
+//根据薪酬排序
+export const getSortBySalaryApi = (data) => {
+    return http({
+        url : '/major/getAndSort',
+        method :'POST',
+        data
+    })
+}
+
+//根据人气排序
+export const getSortByPeopleApi = (data) => {
+    return http({
+        url : '/major/getByPeople',
+        method :'POST',
+        data
+    })
+}

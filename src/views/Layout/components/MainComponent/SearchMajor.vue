@@ -12,13 +12,26 @@ const selected = ref({
     major_category: '全部',
     major_class: '全部'
 })
-//获取筛选数据
+//分页
+const currentPage1 = ref(1)
+const currentPage2 = ref(1)
+const currentPage3 = ref(1)
+//条件展示选项
+const rankRadio = ref('默认排序')
+//薪酬排序选项 0 升序 1 降序
+const sortWay = ref("1")
+const sortWayPeople = ref("1")
+
 
 onMounted(async () => {
+    //获取筛选数据
     await majorStore.getCategoryInfo()
-    //获取学校数据
+    //获取专业数据
     await majorStore.getMajorInfo()
-
+    //获取薪酬排序后的专业数据
+    await majorStore.getSortBySalary(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value }))
+    //获取人气排序后的专业数据
+    await majorStore.getSortByPeople(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value }))
     searchBtn()
 })
 
@@ -26,22 +39,32 @@ onMounted(async () => {
 
 // 搜索按钮
 const searchBtn = async () => {
-    await majorStore.getSearchInfo(search.value)
+    if (rankRadio.value === '默认排序')
+        await majorStore.getSearchInfo(search.value)
+    else if (rankRadio.value === '人气排序') console.log('人气排序')
+    // else if (rankRadio.value === '薪酬排序') majorStore.getSortBySalary({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value })
+
 }
 
+//监听排序单选按钮变化
+watch(sortWay, async () => {
+    await majorStore.getSortBySalary(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value }))
+})
+watch(sortWayPeople, async () => {
+    await majorStore.getSortByPeople(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value }))
+})
 // 监听筛选选项变化
-watch(selected, () => {
+watch(selected, async () => {
     search.value = ""
-    majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class })
+    if (rankRadio.value === '默认排序')
+        await majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class })
+    else if (rankRadio.value === '人气排序') await majorStore.getSortByPeople(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value }))
+    else if (rankRadio.value === '薪酬排序') await majorStore.getSortBySalary({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value })
+
 }, {
     deep: true,
 })
 
-
-//分页
-const currentPage = ref(1)
-//排序选项
-const rankRadio = ref('默认排序')
 </script>
 <template>
     <div class="searchSchool">
@@ -91,25 +114,64 @@ const rankRadio = ref('默认排序')
             <div class="demo-collapse" v-if="rankRadio === '默认排序'">
                 <el-collapse>
                     <el-collapse-item
-                        v-for="(value, index) in majorStore.searchInfo.major_categories?.slice((5 * (currentPage - 1)), (5 * currentPage))"
+                        v-for="(value, index) in majorStore.searchInfo.major_categories?.slice((5 * (currentPage1 - 1)), (5 * currentPage1))"
                         :title="value.category_name" :key="index">
                         <div v-for="(item, index) in value.major_classes" :key="index">
                             <h2 style="color: lightgreen;">{{ item.class_name }}</h2>
-                            <MajorPanel v-for="(v, i) in item.majors" :key="i" :item="v"></MajorPanel>
+                            <MajorPanel v-for="(v, i) in item.majors" :key="i" :item="v">
+                            </MajorPanel>
                         </div>
                     </el-collapse-item>
                 </el-collapse>
                 <div class="demo-pagination-block">
-                    <el-pagination v-model:current-page="currentPage" :small="small" :disabled="disabled"
+                    <el-pagination v-model:current-page="currentPage1" :small="small" :disabled="disabled"
                         :background="background" layout="prev, pager, next, jumper"
                         :total="majorStore.searchInfo.major_categories?.length" @size-change="handleSizeChange"
                         @current-change="handleCurrentChange" :default-page-size="5" />
                 </div>
             </div>
-              <!-- 内容显示 人气排序 -->
-              <div v-if="rankRadio === '人气排序'"><br> 人气排序</div>
-              <!-- 内容显示 薪酬排序 -->
-              <div v-if="rankRadio === '薪酬排序'"><br> 薪酬排序</div>
+            <!-- 内容显示 人气排序 -->
+            <div v-if="rankRadio === '人气排序'">
+                <div style="margin: 10px 20px;float: right;">
+                    <el-radio-group v-model="sortWayPeople" size="small">
+                        <el-radio label="1" border>从高到低</el-radio>
+                        <el-radio label="0" border>从低到高</el-radio>
+                    </el-radio-group>
+                </div>
+                <MajorPanel
+                    v-for="(v, i) in majorStore.peopleSortInfo.slice((10 * (currentPage2 - 1)), (10 * currentPage2))"
+                    :key="i" :item="v">
+                    <template #people>
+                        <span class="salary"> <i class="iconfont icon-renqiredu"></i> 人气值 : <i> {{ v.popularity
+                        }}</i></span>
+                    </template>
+                </MajorPanel>
+                <div class="demo-pagination-block">
+                    <el-pagination v-model:current-page="currentPage2" :small="small" :disabled="disabled"
+                        :background="background" layout="prev, pager, next, jumper"
+                        :total="majorStore.peopleSortInfo.length" @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange" :default-page-size="10" />
+                </div>
+            </div>
+            <!-- 内容显示 薪酬排序 -->
+            <div v-if="rankRadio === '薪酬排序'">
+                <div style="margin: 10px 20px;float: right;">
+                    <el-radio-group v-model="sortWay" size="small">
+                        <el-radio label="1" border>从高到低</el-radio>
+                        <el-radio label="0" border>从低到高</el-radio>
+                    </el-radio-group>
+                </div>
+                <MajorPanel
+                    v-for="(v, i) in majorStore.salarySortInfo.slice((10 * (currentPage3 - 1)), (10 * currentPage3))"
+                    :key="i" :item="v">
+                </MajorPanel>
+                <div class="demo-pagination-block">
+                    <el-pagination v-model:current-page="currentPage3" :small="small" :disabled="disabled"
+                        :background="background" layout="prev, pager, next, jumper"
+                        :total="majorStore.salarySortInfo.length" @size-change="handleSizeChange"
+                        @current-change="handleCurrentChange" :default-page-size="10" />
+                </div>
+            </div>
         </div>
         <div class="right-box"><br><br><br>
             <h1>右 <br> 边</h1>
@@ -117,6 +179,11 @@ const rankRadio = ref('默认排序')
     </div>
 </template>
 <style scoped  lang="scss">
+.salary {
+    margin-left: 20px;
+    color: red;
+}
+
 ::v-deep .el-collapse-item__header {
     font-size: 24px;
     font-weight: 700;
@@ -240,6 +307,5 @@ const rankRadio = ref('默认排序')
     color: #6b778c;
     font-size: 24px;
     font-weight: 500;
-}
-</style>
+}</style>
   

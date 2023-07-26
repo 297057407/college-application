@@ -28,8 +28,8 @@ const arr = ref([
   },
   {
     id: 6,
-    path: '/toolbox',
-    name: '高考工具箱',
+    path: '/my',
+    name: '个人中心',
   },
 ])
 

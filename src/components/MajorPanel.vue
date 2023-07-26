@@ -7,7 +7,7 @@ const props = defineProps({
 <template>
     <li class="li-panel">
         <div class="info">
-            <div class="info-top"><span class="info-name">{{ props.item.name}}</span>
+            <div class="info-top"><span class="info-name">{{ props.item.major_name}}</span><slot name="people"></slot>
             </div>
             <div class="flex flex-wrap gap-2 my-2">
                 <el-tag>
