@@ -1,16 +1,21 @@
 <script  setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import MajorPanel from '@/components/MajorPanel.vue'
-
+import { ElMessage } from 'element-plus'
+import 'element-plus/es/components/message/style/css'
 import { useMajorStore } from '@/stores/major.js'
+import { useCollectStore } from '@/stores/collect.js'
+import { useUserStore } from '@/stores/user.js'
 
+const collectStore = useCollectStore()
+const userStore = useUserStore()
 const majorStore = useMajorStore()
 //搜索框
-const search = ref('')
+const search_name = ref('')
 const selected = ref({
     major_level: '本科',
     major_category: '全部',
-    major_class: '全部'
+    major_class: '全部',
 })
 //分页
 const currentPage1 = ref(1)
@@ -22,57 +27,86 @@ const rankRadio = ref('默认排序')
 const sortWay = ref("1")
 const sortWayPeople = ref("1")
 
+//请求最新数据
+const sendRequest = async () => {
+    if (rankRadio.value === '默认排序') await majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, 'search_name': search_name.value })
+    else if (rankRadio.value === '人气排序') await majorStore.getSortByPeople(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value, 'search_name': search_name.value }))
+    else if (rankRadio.value === '薪酬排序') await majorStore.getSortBySalary({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value, 'search_name': search_name.value })
+}
 
 onMounted(async () => {
     //获取筛选数据
     await majorStore.getCategoryInfo()
-    //获取专业数据
-    await majorStore.getMajorInfo()
-    //获取薪酬排序后的专业数据
-    await majorStore.getSortBySalary(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value }))
-    //获取人气排序后的专业数据
-    await majorStore.getSortByPeople(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value }))
-    searchBtn()
+    //获取默认排序的专业数据
+    await majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, 'search_name': search_name.value })
+    //获取收藏信息
+    await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 0 })
+    console.log(collectStore.collectMajor);
 })
-
-
 
 // 搜索按钮
 const searchBtn = async () => {
-    if (rankRadio.value === '默认排序')
-        await majorStore.getSearchInfo(search.value)
-    else if (rankRadio.value === '人气排序') console.log('人气排序')
-    // else if (rankRadio.value === '薪酬排序') majorStore.getSortBySalary({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value })
-
+    await sendRequest()
 }
-
+//监听排序方式的变化
+watch(rankRadio, async () => {
+    await sendRequest()
+})
 //监听排序单选按钮变化
 watch(sortWay, async () => {
-    await majorStore.getSortBySalary(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value }))
+    await majorStore.getSortBySalary({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value, 'search_name': search_name.value })
 })
 watch(sortWayPeople, async () => {
-    await majorStore.getSortByPeople(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value }))
+    await majorStore.getSortByPeople({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value, 'search_name': search_name.value })
 })
 // 监听筛选选项变化
 watch(selected, async () => {
-    search.value = ""
-    if (rankRadio.value === '默认排序')
-        await majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class })
-    else if (rankRadio.value === '人气排序') await majorStore.getSortByPeople(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value }))
-    else if (rankRadio.value === '薪酬排序') await majorStore.getSortBySalary({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value })
-
+    await sendRequest()
 }, {
     deep: true,
 })
 
+//默认排序的数据
+const defaultDate = computed(() => {
+    return majorStore.searchInfo.major_categories?.slice((5 * (currentPage1.value - 1)), (5 * currentPage1.value)) || []
+})
+//人气排序的数据
+const peopleDate = computed(() => {
+    return majorStore.peopleSortInfo.slice((10 * (currentPage2.value - 1)), (10 * currentPage2.value)) || []
+})
+//薪酬排序的数据
+const salaryDate = computed(() => {
+    return majorStore.salarySortInfo.slice((10 * (currentPage3.value - 1)), (10 * currentPage3.value)) || []
+})
+
+//取消收藏按钮
+const deleteCollectBtn = async (item_id) => {
+    await collectStore.favoriteDelete({
+        user_id: userStore.userInfo.user_id,
+        item_id: item_id,
+        item_type: 0
+    })
+    await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 0 })
+    ElMessage.success("取消收藏成功")
+
+}
+//添加收藏
+const addCollectBtn = async (item_id) => {
+    await collectStore.favoriteAdd({
+        user_id: userStore.userInfo.user_id,
+        item_id: item_id,
+        item_type: 0
+    })
+    await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 0 })
+    ElMessage.success("添加收藏成功")
+}
 </script>
 <template>
-    <div class="searchSchool">
+    <div class="searchMajor">
         <div class="left-box">
-
             <div class="search">
                 <i class="iconfont icon-icon-search"></i>
-                <el-input class="input" v-model="search" placeholder="根据名称搜专业" clearable />
+                <el-input class="input" v-model="search_name" placeholder="根据名称搜专业" clearable />
                 <el-button type="primary" @click="searchBtn">搜索</el-button>
             </div>
             <br><br>
@@ -112,66 +146,99 @@ watch(selected, async () => {
             </el-radio-group>
             <!-- 内容显示 默认排序 -->
             <div class="demo-collapse" v-if="rankRadio === '默认排序'">
-                <el-collapse>
-                    <el-collapse-item
-                        v-for="(value, index) in majorStore.searchInfo.major_categories?.slice((5 * (currentPage1 - 1)), (5 * currentPage1))"
-                        :title="value.category_name" :key="index">
-                        <div v-for="(item, index) in value.major_classes" :key="index">
-                            <h2 style="color: lightgreen;">{{ item.class_name }}</h2>
-                            <MajorPanel v-for="(v, i) in item.majors" :key="i" :item="v">
-                            </MajorPanel>
-                        </div>
-                    </el-collapse-item>
-                </el-collapse>
-                <div class="demo-pagination-block">
-                    <el-pagination v-model:current-page="currentPage1" :small="small" :disabled="disabled"
-                        :background="background" layout="prev, pager, next, jumper"
-                        :total="majorStore.searchInfo.major_categories?.length" @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange" :default-page-size="5" />
+                <div v-if="defaultDate.length">
+                    <el-collapse>
+                        <el-collapse-item v-for="(value, index) in defaultDate" :title="value.category_name" :key="index">
+                            <div v-for="(item, index) in value.major_classes" :key="index">
+                                <h2 style="color: lightgreen;">{{ item.class_name }}</h2>
+                                <MajorPanel v-for="(v, i) in item.majors" :key="i" :item="v">
+                                    <template #btn>
+                                        <el-button
+                                            v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
+                                            type="primary" @click="deleteCollectBtn(v.id)">
+                                            <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
+                                        <el-button v-else @click="addCollectBtn(v.id)"> <span><i
+                                                    class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
+                                    </template>
+                                </MajorPanel>
+                            </div>
+                        </el-collapse-item>
+                    </el-collapse>
+                    <div class="demo-pagination-block">
+                        <el-pagination v-model:current-page="currentPage1" :small="small" :disabled="disabled"
+                            :background="background" layout="prev, pager, next, jumper"
+                            :total="majorStore.searchInfo.major_categories?.length" @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange" :default-page-size="5" />
+                    </div>
                 </div>
+                <!-- 空标签 -->
+                <el-empty description="啥也没搜到~" v-else />
             </div>
+
             <!-- 内容显示 人气排序 -->
             <div v-if="rankRadio === '人气排序'">
-                <div style="margin: 10px 20px;float: right;">
-                    <el-radio-group v-model="sortWayPeople" size="small">
-                        <el-radio label="1" border>从高到低</el-radio>
-                        <el-radio label="0" border>从低到高</el-radio>
-                    </el-radio-group>
+                <div v-if="peopleDate.length">
+                    <div style="margin: 10px 20px;float: right;">
+                        <el-radio-group v-model="sortWayPeople" size="small">
+                            <el-radio label="1" border>从高到低</el-radio>
+                            <el-radio label="0" border>从低到高</el-radio>
+                        </el-radio-group>
+                    </div>
+                    <MajorPanel v-for="(v, i) in peopleDate" :key="i" :item="v">
+                        <template #people>
+                            <span class="salary"> <i class="iconfont icon-renqiredu"></i> 人气值 : <i> {{ v.popularity
+                            }}</i></span>
+                        </template>
+                        <template #btn>
+                            <el-button v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
+                                type="primary" @click="deleteCollectBtn(v.id)">
+                                <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
+                            <el-button v-else @click="addCollectBtn(v.id)"> <span><i
+                                        class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
+                        </template>
+                    </MajorPanel>
+                    <div class="demo-pagination-block">
+                        <el-pagination v-model:current-page="currentPage2" :small="small" :disabled="disabled"
+                            :background="background" layout="prev, pager, next, jumper"
+                            :total="majorStore.peopleSortInfo.length" @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange" :default-page-size="10" />
+                    </div>
                 </div>
-                <MajorPanel
-                    v-for="(v, i) in majorStore.peopleSortInfo.slice((10 * (currentPage2 - 1)), (10 * currentPage2))"
-                    :key="i" :item="v">
-                    <template #people>
-                        <span class="salary"> <i class="iconfont icon-renqiredu"></i> 人气值 : <i> {{ v.popularity
-                        }}</i></span>
-                    </template>
-                </MajorPanel>
-                <div class="demo-pagination-block">
-                    <el-pagination v-model:current-page="currentPage2" :small="small" :disabled="disabled"
-                        :background="background" layout="prev, pager, next, jumper"
-                        :total="majorStore.peopleSortInfo.length" @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange" :default-page-size="10" />
-                </div>
+                <!-- 空标签 -->
+                <el-empty description="啥也没搜到~" v-else />
             </div>
+
             <!-- 内容显示 薪酬排序 -->
             <div v-if="rankRadio === '薪酬排序'">
-                <div style="margin: 10px 20px;float: right;">
-                    <el-radio-group v-model="sortWay" size="small">
-                        <el-radio label="1" border>从高到低</el-radio>
-                        <el-radio label="0" border>从低到高</el-radio>
-                    </el-radio-group>
+                <div v-if="salaryDate.length">
+                    <div style="margin: 10px 20px;float: right;">
+                        <el-radio-group v-model="sortWay" size="small">
+                            <el-radio label="1" border>从高到低</el-radio>
+                            <el-radio label="0" border>从低到高</el-radio>
+                        </el-radio-group>
+                    </div>
+                    <div>
+                        <MajorPanel v-for="(v, i) in salaryDate" :key="i" :item="v">
+                            <template #btn>
+                                <el-button v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
+                                    type="primary" @click="deleteCollectBtn(v.id)">
+                                    <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
+                                <el-button v-else @click="addCollectBtn(v.id)"> <span><i
+                                            class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
+                            </template>
+                        </MajorPanel>
+                    </div>
+                    <div class="demo-pagination-block">
+                        <el-pagination v-model:current-page="currentPage3" :small="small" :disabled="disabled"
+                            :background="background" layout="prev, pager, next, jumper"
+                            :total="majorStore.salarySortInfo.length" @size-change="handleSizeChange"
+                            @current-change="handleCurrentChange" :default-page-size="10" />
+                    </div>
                 </div>
-                <MajorPanel
-                    v-for="(v, i) in majorStore.salarySortInfo.slice((10 * (currentPage3 - 1)), (10 * currentPage3))"
-                    :key="i" :item="v">
-                </MajorPanel>
-                <div class="demo-pagination-block">
-                    <el-pagination v-model:current-page="currentPage3" :small="small" :disabled="disabled"
-                        :background="background" layout="prev, pager, next, jumper"
-                        :total="majorStore.salarySortInfo.length" @size-change="handleSizeChange"
-                        @current-change="handleCurrentChange" :default-page-size="10" />
-                </div>
+                <!-- 空标签 -->
+                <el-empty description="啥也没搜到~" v-else />
             </div>
+
         </div>
         <div class="right-box"><br><br><br>
             <h1>右 <br> 边</h1>
@@ -193,9 +260,8 @@ watch(selected, async () => {
     margin-top: 30px;
 }
 
-.searchSchool {
+.searchMajor {
     background-color: #fff;
-    padding: 15px;
 }
 
 .demo-pagination-block {
@@ -204,9 +270,8 @@ watch(selected, async () => {
 }
 
 
-.searchSchool {
+.searchMajor {
     display: flex;
-    margin-top: 20px;
 }
 
 .search {
@@ -230,6 +295,7 @@ watch(selected, async () => {
 
 .left-box {
     width: 800px;
+    padding-left: 20px;
 }
 
 .right-box {
@@ -307,5 +373,6 @@ watch(selected, async () => {
     color: #6b778c;
     font-size: 24px;
     font-weight: 500;
-}</style>
+}
+</style>
   

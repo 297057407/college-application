@@ -22,8 +22,7 @@ const props = defineProps({
             </div>
         </div>
         <div class="btn">
-            <el-button type="primary">Primary</el-button>
-            <el-button type="success">Success</el-button>
+           <slot name="btn"></slot>
         </div>
     </li>
 </template>

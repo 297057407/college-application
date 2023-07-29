@@ -1,10 +1,17 @@
 <script  setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, onMounted, watch, computed } from 'vue'
 import SchoolPanel from '@/components/SchoolPanel.vue'
+import { ElMessage } from 'element-plus'
+import 'element-plus/es/components/message/style/css'
 import { useSchoolStore } from '@/stores/school.js'
+import { useCollectStore } from '@/stores/collect.js'
+import { useUserStore } from '@/stores/user.js'
+
 const schoolStore = useSchoolStore()
+const collectStore = useCollectStore()
+const userStore = useUserStore()
 //搜索框
-const search = ref('')
+const search_name = ref('')
 const selected = ref({
     level: '全部',
     location: '全部',
@@ -17,35 +24,51 @@ onMounted(async () => {
     await schoolStore.getCategory()
     //获取学校数据
     await schoolStore.getSchoolInfo()
-    searchBtn()
+    //获取收藏信息
+    await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 1 })
 })
 
 
 //搜索按钮
 const searchBtn = () => {
-    schoolStore.getSearchInfo(search.value)
+    schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value })
 }
 
 //监听筛选选项变化
 watch(selected, () => {
-    search.value = ""
-    schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString() })
+    schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value })
 }, {
     deep: true,
 })
-// const newSchoolInfo = computed(() => {
-//     if (search.value.trim() === '') {
-//         return schoolStore.allSchoolInfo
-//     }
-//     else {
-//         return schoolStore.allSchoolInfo.filter((item) => item.name.includes(search.value.trim())  ) || []
-//     }
-// })
 
 //分页
 const currentPage = ref(1)
 
+const currentPageData = computed(() => {
+    return schoolStore.allSchoolInfo.slice((10 * (currentPage.value - 1)), (10 * currentPage.value))
+})
 
+//取消收藏按钮
+const deleteCollectBtn = async (item_id) => {
+    await collectStore.favoriteDelete({
+        user_id: userStore.userInfo.user_id,
+        item_id: item_id,
+        item_type: 1
+    })
+    await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 1 })
+    ElMessage.success("取消收藏成功")
+
+}
+//添加收藏
+const addCollectBtn = async (item_id) => {
+    await collectStore.favoriteAdd({
+        user_id: userStore.userInfo.user_id,
+        item_id: item_id,
+        item_type: 1
+    })
+    await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 1 })
+    ElMessage.success("添加收藏成功")
+}
 </script>
 <template>
     <div class="searchSchool">
@@ -53,7 +76,7 @@ const currentPage = ref(1)
             <el-tabs type="border-card" class="demo-tabs">
                 <div class="search">
                     <i class="iconfont icon-icon-search"></i>
-                    <el-input class="input" v-model="search" placeholder="根据校名搜大学" clearable />
+                    <el-input class="input" v-model="search_name" placeholder="根据校名搜大学" clearable />
                     <el-button type="primary" @click="searchBtn">搜索</el-button>
                 </div>
                 <br>
@@ -63,7 +86,8 @@ const currentPage = ref(1)
                         <div class="tag">
                             <el-radio-group v-model="selected.location" size="large">
                                 <el-radio-button label="全部" />
-                                <el-radio-button v-for="item in schoolStore.categoryInfo.location" :label="item" :key="item" />
+                                <el-radio-button v-for="item in schoolStore.categoryInfo.location" :label="item"
+                                    :key="item" />
                             </el-radio-group>
                         </div>
                     </div>
@@ -95,18 +119,26 @@ const currentPage = ref(1)
                             </el-checkbox-group>
                         </div>
                     </div>
-                    <div>
-                        <SchoolPanel class="infinite-list-item"
-                            v-for="item in schoolStore.searchInfo.slice((10 * (currentPage - 1)), (10 * currentPage))"
-                            :key="item.id" :name="item.name" :location="item.location" :tags="item.tags.split(',')">
+                    <div v-if="currentPageData.length">
+                        <SchoolPanel class="infinite-list-item" v-for="item in currentPageData" :key="item.id"
+                            :name="item.name" :location="item.location" :tags="item.tags.split(',')">
+                            <template #btn>
+                                <el-button v-if="collectStore.collectSchool.findIndex(v => v.item_id === item.id) !== -1"
+                                    type="primary" @click="deleteCollectBtn(item.id)">
+                                    <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
+                                <el-button v-else @click="addCollectBtn(item.id)"> <span><i
+                                            class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
+                            </template>
                         </SchoolPanel>
                         <div class="demo-pagination-block">
                             <el-pagination v-model:current-page="currentPage" layout="prev, pager, next, jumper"
-                                :total="schoolStore.searchInfo.length" @size-change="handleSizeChange"
+                                :total="schoolStore.allSchoolInfo.length" @size-change="handleSizeChange"
                                 @current-change="handleCurrentChange">
                             </el-pagination>
                         </div>
                     </div>
+                    <!-- 空标签 -->
+                    <el-empty description="啥也没搜到~" v-else />
                 </el-tab-pane>
                 <el-tab-pane label="大学分数线">大学分数线</el-tab-pane>
             </el-tabs>
@@ -120,6 +152,7 @@ const currentPage = ref(1)
 ::v-deep .el-tabs--border-card>.el-tabs__header {
     background-color: #fff;
 }
+
 ::v-deep .demo-pagination-block {
     margin: 30px 150px;
     margin-right: 0;
@@ -144,7 +177,6 @@ const currentPage = ref(1)
 }
 
 .searchSchool {
-    margin-top: 20px;
     display: flex;
 }
 

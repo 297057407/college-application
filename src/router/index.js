@@ -9,6 +9,10 @@ const router = createRouter({
       component: layout,
       children: [
         {
+          path: '',
+          component: () => import('../views/Layout/components/MainComponent/Home.vue')
+        },
+        {
           path: 'searchschool',
           component: () => import('../views/Layout/components/MainComponent/SearchSchool.vue')
         },
@@ -20,7 +24,7 @@ const router = createRouter({
           path: 'my',
           component: () => import('../views/Layout/components/MainComponent/My.vue'),
           children: [{
-            path: 'myinfo',
+            path: '',
             component: () => import('../views/Layout/components/MainComponent/MyComponent/MyInfo.vue')
           }]
         },

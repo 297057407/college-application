@@ -2,7 +2,7 @@
 import { ref } from 'vue'
 const leftList = ref([{ name: '会员中心' }, { name: '个人资料' }, { name: '我的收藏' }, { name: '我的志愿表' }, { name: '我的订单' }, { name: '意见反馈' }, { name: '用户协议' }, { name: '隐私政策' }, { name: '联系客服' }])
 //左侧选中下标
-const i = ref(0)
+const i = ref(1)
 </script>
 <template>
     <div class="common-layout">

@@ -3,7 +3,7 @@ import { ref } from 'vue'
 const arr = ref([
   {
     id: 1,
-    path: '/home',
+    path: '/',
     name: '首页',
   },
   {
@@ -21,13 +21,9 @@ const arr = ref([
     path: '/searchmajor',
     name: '查专业',
   },
+
   {
     id: 5,
-    path: '/chooseuniversity',
-    name: '智能选大学',
-  },
-  {
-    id: 6,
     path: '/my',
     name: '个人中心',
   },
@@ -41,9 +37,10 @@ const arr = ref([
     <div class="container">
       <ul class="header-nav">
         <li class="home" v-for="item in arr" :key="item.id">
-          <!-- <RouterLink class="font-link" active-class="active" :to="`${item.path}`">{{ item.name }}</RouterLink> -->
-          <RouterLink class="font-link" active-class="active" :to="`${item.path}`">{{ item.name }}</RouterLink>
+          <RouterLink class="font-link" active-class="active" :to="`${item.path}`" exact-active-class="active">{{
+            item.name }}</RouterLink>
         </li>
+        <li><a class="font-link" href="https://eduranking.cn/" target="_blank">易度大学排名</a></li>
       </ul>
     </div>
   </header>
@@ -55,18 +52,26 @@ const arr = ref([
   background: #fff;
 
   .container {
+    width: 1200px;
     display: flex;
     align-items: center;
+    margin-bottom: 20px;
   }
 
   .header-nav {
     display: flex;
     position: relative;
     z-index: 998;
+
     .font-link {
       font-size: 20px;
       font-weight: 700;
+      color: #007bff;
+      text-decoration: none;
+      transition: color 0.3s ease;
+
     }
+
     li {
       margin-right: 40px;
       width: 120px;
@@ -86,7 +91,7 @@ const arr = ref([
       }
 
       .active {
-        border-bottom: 1px solid #666;
+        color: #ff5722; 
       }
     }
   }

@@ -6,6 +6,9 @@ import { useRouter } from 'vue-router'
 const router = useRouter()
 //导入登陆注册接口
 import { loginApi, registerApi } from '@/apis/login'
+import { useUserStore } from '@/stores/user'
+const userStore = useUserStore()
+
 
 //控制登陆注册切换
 const login = ref(true)
@@ -32,14 +35,16 @@ const loginForm = async (loginRef) => {
   await loginRef.validate(async (valid, fields) => {
     if (valid) {
       //登录验证合法需要做的事情
-      const res = await loginApi(loginRuleForm.value)
+      const res = await userStore.login(loginRuleForm.value)
       if (res.status === "success") {
         ElMessage.success(res.message)
         router.push('/')
-      } else {
+      } 
+      else {
         ElMessage.warning(res.message)
       }
-    } else {
+    }
+     else {
       console.log('error submit!', fields)
     }
   })
@@ -72,11 +77,10 @@ const registerForm = async (registerRef) => {
   await registerRef.validate(async (valid, fields) => {
     if (valid) {
       //注册验证合法需要做的事情
-      console.log('submit!')
-      const res = await registerApi(registerRuleForm.value)
+      const res = await userStore.register(registerRuleForm.value)
       if (res.status === "success") {
         ElMessage.success(res.message)
-        router.push('/')
+        login.value = true
       } else {
         ElMessage.warning(res.message)
       }

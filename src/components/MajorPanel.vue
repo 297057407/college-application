@@ -26,7 +26,8 @@ const props = defineProps({
         </div>
         <div class="btn">    
          <i class="iconfont icon-qian"></i><span class="salary">平均薪资:￥<i>{{ props.item.average_salary }}</i></span>
-            <el-button type="success">开设院校</el-button>
+            <slot name="btn"></slot>
+            <!-- <el-button type="success">开设院校</el-button> -->
         </div>
     </li>
 </template>

@@ -41,7 +41,7 @@ const { y } = useScroll(window)
 </script>
 
 <template>
-  <div class="header-sticky " :class="{'show' : y  > 78}">
+  <div class="header-sticky " :class="{'show' : y  > 178}">
     <div class="container w1200">
       <!-- 导航区域 -->
       <ul class="header-nav">
