@@ -28,6 +28,14 @@ const router = createRouter({
             component: () => import('../views/Layout/components/MainComponent/MyComponent/MyInfo.vue')
           }]
         },
+        {
+          path: 'schoolrank',
+          component: () => import('../views/Layout/components/MainComponent/schoolRank.vue')
+        },
+        {
+          path: 'schooldetail/:id',
+          component: () => import('../views/Layout/components/MainComponent/schoolDetail.vue')
+        },
       ]
     },
     {

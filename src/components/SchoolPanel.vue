@@ -57,6 +57,7 @@ const props = defineProps({
 
     .info {
         padding: 18px 50px;
+        padding-right: 0;
         flex: 1;
         height: 100%;
 

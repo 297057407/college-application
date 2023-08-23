@@ -21,9 +21,13 @@ const arr = ref([
     path: '/searchmajor',
     name: '查专业',
   },
-
   {
     id: 5,
+    path: '/schoolrank',
+    name: '学校排名',
+  },
+  {
+    id: 6,
     path: '/my',
     name: '个人中心',
   },
@@ -91,7 +95,7 @@ const arr = ref([
       }
 
       .active {
-        color: #ff5722; 
+        color: #ff5722;
       }
     }
   }

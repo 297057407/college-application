@@ -6,7 +6,8 @@ import 'element-plus/es/components/message/style/css'
 import { useSchoolStore } from '@/stores/school.js'
 import { useCollectStore } from '@/stores/collect.js'
 import { useUserStore } from '@/stores/user.js'
-
+import { ElLoading } from 'element-plus'
+import "element-plus/theme-chalk/el-loading.css";
 const schoolStore = useSchoolStore()
 const collectStore = useCollectStore()
 const userStore = useUserStore()
@@ -19,24 +20,47 @@ const selected = ref({
     type: '全部'
 })
 
-
+const loadEl = ref(null)
+const curloadEl = ref(null)
 onMounted(async () => {
+    const loading = ElLoading.service({
+        text: '玩命加载中...',
+        target: loadEl.value
+    })
+    //获取分类信息
     await schoolStore.getCategory()
     //获取学校数据
     await schoolStore.getSchoolInfo()
     //获取收藏信息
     await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 1 })
+    loading.close()
 })
 
 
 //搜索按钮
+const btndisabled = ref(false)
 const searchBtn = () => {
+    if(btndisabled.value) return 
+    btndisabled.value = true
+    const loading = ElLoading.service({
+        text: '玩命加载中...',
+        target: curloadEl.value || loadEl.value
+    })
     schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value })
+    loading.close()
+    btndisabled.value = false
+
 }
 
 //监听筛选选项变化
 watch(selected, () => {
+    const loading = ElLoading.service({
+        text: '玩命加载中...',
+        target: curloadEl.value || loadEl.value
+    })
     schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value })
+    loading.close()
+
 }, {
     deep: true,
 })
@@ -80,8 +104,9 @@ const addCollectBtn = async (item_id) => {
                     <el-button type="primary" @click="searchBtn">搜索</el-button>
                 </div>
                 <br>
-                <el-tab-pane class="border" label="院校大全">
-                    <div class="institution-affiliation">
+                <el-tab-pane class="border" label="院校大全" >
+                    <div ref="loadEl">
+                        <div class="institution-affiliation">
                         <span>院校所属 > </span>
                         <div class="tag">
                             <el-radio-group v-model="selected.location" size="large">
@@ -119,9 +144,9 @@ const addCollectBtn = async (item_id) => {
                             </el-checkbox-group>
                         </div>
                     </div>
-                    <div v-if="currentPageData.length">
+                    <div v-if="currentPageData.length" ref="curloadEl">
                         <SchoolPanel class="infinite-list-item" v-for="item in currentPageData" :key="item.id"
-                            :name="item.name" :location="item.location" :tags="item.tags.split(',')">
+                            :name="item.name" :location="item.location" :tags="item.tags.split('/')">
                             <template #btn>
                                 <el-button v-if="collectStore.collectSchool.findIndex(v => v.item_id === item.id) !== -1"
                                     type="primary" @click="deleteCollectBtn(item.id)">
@@ -139,6 +164,7 @@ const addCollectBtn = async (item_id) => {
                     </div>
                     <!-- 空标签 -->
                     <el-empty description="啥也没搜到~" v-else />
+                    </div>
                 </el-tab-pane>
                 <el-tab-pane label="大学分数线">大学分数线</el-tab-pane>
             </el-tabs>

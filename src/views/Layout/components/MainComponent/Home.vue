@@ -11,14 +11,10 @@ const imgArr = ["src/assets/images/1.jpg", "src/assets/images/c2.jpg", "src/asse
 //     console.log(tab, event)
 // }
 
-const count = ref(0)
-const load = () => {
-    count.value += 2
-}
+
 </script>
 <template>
-    <!-- <div class="countainer">
-        轮播图
+    <div class="countainer">
         <div class="carousel-container">
             <el-carousel indicator-position="outside" height="300px" :interval="3000" type="card">
                 <el-carousel-item v-for="(img, index) in imgArr" :key="index">
@@ -26,18 +22,6 @@ const load = () => {
                 </el-carousel-item>
             </el-carousel>
         </div>
-        热门
-        <ul class="hotitem infinite-list" v-infinite-scroll="load" style="overflow: auto">
-            <HotItem v-for="item in count" :key="item" class="infinite-list-item"></HotItem>
-        </ul>
-        <el-tabs v-model="activeName" type="card" class="demo-tabs" @tab-click="handleClick">
-            <el-tab-pane label="热门院校" name="first">
-               
-            </el-tab-pane>
-            <el-tab-pane label="热门专业" name="second">热门专业</el-tab-pane>
-        </el-tabs>
-    </div> -->
-
     <div class="hot-top">
         <h2>热门院校</h2> <a href="#" class="fresh"><i class="iconfont icon-huanyipi"></i> 换一批</a>
     </div>
@@ -83,6 +67,8 @@ const load = () => {
             <li></li>
         </ul>
     </section>
+    </div>
+  
 </template>
 <style scoped lang="scss">
 .hot-top {

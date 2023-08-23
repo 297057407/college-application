@@ -33,4 +33,21 @@ export const getSchoolByTagsApi = (data) => {
     })
 }
 
+//学校排名模块
+// 获取排序后的学校信息（分页）
+export const getSchoolRankingApi = (data) => {
+    return http({
+        url: '/university/getRanking',
+        method : 'POST',
+        data
+    })
+}
 
+//获取筛选+排序后的学校信息用于下载（不分页）
+export const downloadRankingApi = (data) => {
+    return http({
+        url: '/university/getAllRanking',
+        method : 'POST',
+        data
+    })
+}

@@ -6,7 +6,8 @@ import 'element-plus/es/components/message/style/css'
 import { useMajorStore } from '@/stores/major.js'
 import { useCollectStore } from '@/stores/collect.js'
 import { useUserStore } from '@/stores/user.js'
-
+import { ElLoading } from 'element-plus'
+import "element-plus/theme-chalk/el-loading.css";
 const collectStore = useCollectStore()
 const userStore = useUserStore()
 const majorStore = useMajorStore()
@@ -29,24 +30,39 @@ const sortWayPeople = ref("1")
 
 //请求最新数据
 const sendRequest = async () => {
+    const loading = ElLoading.service({
+        text: '玩命加载中...',
+        target: loadoneEl.value
+    })
     if (rankRadio.value === '默认排序') await majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, 'search_name': search_name.value })
     else if (rankRadio.value === '人气排序') await majorStore.getSortByPeople(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value, 'search_name': search_name.value }))
     else if (rankRadio.value === '薪酬排序') await majorStore.getSortBySalary({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value, 'search_name': search_name.value })
+    loading.close()
 }
+const loadEl = ref(null)
+const loadoneEl = ref(null)
 
 onMounted(async () => {
+    const loading = ElLoading.service({
+        text: '玩命加载中...',
+        target: loadEl.value
+    })
     //获取筛选数据
     await majorStore.getCategoryInfo()
     //获取默认排序的专业数据
     await majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, 'search_name': search_name.value })
     //获取收藏信息
     await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 0 })
-    console.log(collectStore.collectMajor);
+    loading.close()
 })
 
 // 搜索按钮
+const btndisabled = ref(false)
 const searchBtn = async () => {
+    if(btndisabled.value) return 
+    btndisabled.value = true
     await sendRequest()
+    btndisabled.value = false
 }
 //监听排序方式的变化
 watch(rankRadio, async () => {
@@ -110,48 +126,120 @@ const addCollectBtn = async (item_id) => {
                 <el-button type="primary" @click="searchBtn">搜索</el-button>
             </div>
             <br><br>
-            <!-- 筛选列表 -->
-            <div class="institution-affiliation">
-                <span>专业层次 > </span>
-                <div class="tag">
-                    <el-radio-group v-model="selected.major_level" size="large">
-                        <el-radio-button v-for="item in majorStore.categoryInfo.major_level" :label="item" :key="item" />
-                    </el-radio-group>
+            <div ref="loadEl">
+                <!-- 筛选列表 -->
+                <div class="institution-affiliation">
+                    <span>专业层次 > </span>
+                    <div class="tag">
+                        <el-radio-group v-model="selected.major_level" size="large">
+                            <el-radio-button v-for="item in majorStore.categoryInfo.major_level" :label="item"
+                                :key="item" />
+                        </el-radio-group>
+                    </div>
                 </div>
-            </div>
-            <div class="institution-affiliation">
-                <span>专业门类 > </span>
-                <div class="tag">
-                    <el-radio-group v-model="selected.major_category" size="large">
-                        <el-radio-button label="全部" />
-                        <el-radio-button v-for="item in majorStore.categoryInfo.major_category" :label="item" :key="item" />
-                    </el-radio-group>
+                <div class="institution-affiliation">
+                    <span>专业门类 > </span>
+                    <div class="tag">
+                        <el-radio-group v-model="selected.major_category" size="large">
+                            <el-radio-button label="全部" />
+                            <el-radio-button v-for="item in majorStore.categoryInfo.major_category" :label="item"
+                                :key="item" />
+                        </el-radio-group>
+                    </div>
                 </div>
-            </div>
-            <div class="institution-affiliation" v-show="selected.major_category !== '全部'">
-                <span>专业大类 > </span>
-                <div class="tag">
-                    <el-radio-group v-model="selected.major_class" size="large">
-                        <el-radio-button label="全部" />
-                        <el-radio-button v-for="item in majorStore.categoryInfo.major_class?.[selected.major_category]"
-                            :label="item" :key="item" />
-                    </el-radio-group>
+                <div class="institution-affiliation" v-show="selected.major_category !== '全部'">
+                    <span>专业大类 > </span>
+                    <div class="tag">
+                        <el-radio-group v-model="selected.major_class" size="large">
+                            <el-radio-button label="全部" />
+                            <el-radio-button v-for="item in majorStore.categoryInfo.major_class?.[selected.major_category]"
+                                :label="item" :key="item" />
+                        </el-radio-group>
+                    </div>
                 </div>
-            </div>
-            <!-- 排序选项 -->
-            <el-radio-group v-model="rankRadio">
-                <el-radio label="默认排序" size="large" border></el-radio>
-                <el-radio label="人气排序" size="large" border></el-radio>
-                <el-radio label="薪酬排序" size="large" border></el-radio>
-            </el-radio-group>
-            <!-- 内容显示 默认排序 -->
-            <div class="demo-collapse" v-if="rankRadio === '默认排序'">
-                <div v-if="defaultDate.length">
-                    <el-collapse>
-                        <el-collapse-item v-for="(value, index) in defaultDate" :title="value.category_name" :key="index">
-                            <div v-for="(item, index) in value.major_classes" :key="index">
-                                <h2 style="color: lightgreen;">{{ item.class_name }}</h2>
-                                <MajorPanel v-for="(v, i) in item.majors" :key="i" :item="v">
+                <!-- 排序选项 -->
+                <el-radio-group v-model="rankRadio">
+                    <el-radio label="默认排序" size="large" border></el-radio>
+                    <el-radio label="人气排序" size="large" border></el-radio>
+                    <el-radio label="薪酬排序" size="large" border></el-radio>
+                </el-radio-group>
+                <div ref="loadoneEl">
+                    <!-- 内容显示 默认排序 -->
+                    <div class="demo-collapse" v-if="rankRadio === '默认排序'" >
+                        <div v-if="defaultDate.length">
+                            <el-collapse>
+                                <el-collapse-item v-for="(value, index) in defaultDate" :title="value.category_name"
+                                    :key="index">
+                                    <div v-for="(item, index) in value.major_classes" :key="index">
+                                        <h2 style="color: lightgreen;">{{ item.class_name }}</h2>
+                                        <MajorPanel v-for="(v, i) in item.majors" :key="i" :item="v">
+                                            <template #btn>
+                                                <el-button
+                                                    v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
+                                                    type="primary" @click="deleteCollectBtn(v.id)">
+                                                    <span><i
+                                                            class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
+                                                <el-button v-else @click="addCollectBtn(v.id)"> <span><i
+                                                            class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
+                                            </template>
+                                        </MajorPanel>
+                                    </div>
+                                </el-collapse-item>
+                            </el-collapse>
+                            <div class="demo-pagination-block">
+                                <el-pagination v-model:current-page="currentPage1" :small="small" :disabled="disabled"
+                                    :background="background" layout="prev, pager, next, jumper"
+                                    :total="majorStore.searchInfo.major_categories?.length" @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange" :default-page-size="5" />
+                            </div>
+                        </div>
+                        <!-- 空标签 -->
+                        <el-empty description="啥也没搜到~" v-else />
+                    </div>
+                    <!-- 内容显示 人气排序 -->
+                    <div v-if="rankRadio === '人气排序'" >
+                        <div v-if="peopleDate.length">
+                            <div style="margin: 10px 20px;float: right;">
+                                <el-radio-group v-model="sortWayPeople" size="small">
+                                    <el-radio label="1" border>从高到低</el-radio>
+                                    <el-radio label="0" border>从低到高</el-radio>
+                                </el-radio-group>
+                            </div>
+                            <MajorPanel v-for="(v, i) in peopleDate" :key="i" :item="v">
+                                <template #people>
+                                    <span class="salary"> <i class="iconfont icon-renqiredu"></i> 人气值 : <i> {{ v.popularity
+                                    }}</i></span>
+                                </template>
+                                <template #btn>
+                                    <el-button
+                                        v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
+                                        type="primary" @click="deleteCollectBtn(v.id)">
+                                        <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
+                                    <el-button v-else @click="addCollectBtn(v.id)"> <span><i
+                                                class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
+                                </template>
+                            </MajorPanel>
+                            <div class="demo-pagination-block">
+                                <el-pagination v-model:current-page="currentPage2" :small="small" :disabled="disabled"
+                                    :background="background" layout="prev, pager, next, jumper"
+                                    :total="majorStore.peopleSortInfo.length" @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange" :default-page-size="10" />
+                            </div>
+                        </div>
+                        <!-- 空标签 -->
+                        <el-empty description="啥也没搜到~" v-else />
+                    </div>
+                    <!-- 内容显示 薪酬排序 -->
+                    <div v-if="rankRadio === '薪酬排序'">
+                        <div v-if="salaryDate.length">
+                            <div style="margin: 10px 20px;float: right;">
+                                <el-radio-group v-model="sortWay" size="small">
+                                    <el-radio label="1" border>从高到低</el-radio>
+                                    <el-radio label="0" border>从低到高</el-radio>
+                                </el-radio-group>
+                            </div>
+                            <div>
+                                <MajorPanel v-for="(v, i) in salaryDate" :key="i" :item="v">
                                     <template #btn>
                                         <el-button
                                             v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
@@ -162,83 +250,18 @@ const addCollectBtn = async (item_id) => {
                                     </template>
                                 </MajorPanel>
                             </div>
-                        </el-collapse-item>
-                    </el-collapse>
-                    <div class="demo-pagination-block">
-                        <el-pagination v-model:current-page="currentPage1" :small="small" :disabled="disabled"
-                            :background="background" layout="prev, pager, next, jumper"
-                            :total="majorStore.searchInfo.major_categories?.length" @size-change="handleSizeChange"
-                            @current-change="handleCurrentChange" :default-page-size="5" />
+                            <div class="demo-pagination-block">
+                                <el-pagination v-model:current-page="currentPage3" :small="small" :disabled="disabled"
+                                    :background="background" layout="prev, pager, next, jumper"
+                                    :total="majorStore.salarySortInfo.length" @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange" :default-page-size="10" />
+                            </div>
+                        </div>
+                        <!-- 空标签 -->
+                        <el-empty description="啥也没搜到~" v-else />
                     </div>
                 </div>
-                <!-- 空标签 -->
-                <el-empty description="啥也没搜到~" v-else />
             </div>
-
-            <!-- 内容显示 人气排序 -->
-            <div v-if="rankRadio === '人气排序'">
-                <div v-if="peopleDate.length">
-                    <div style="margin: 10px 20px;float: right;">
-                        <el-radio-group v-model="sortWayPeople" size="small">
-                            <el-radio label="1" border>从高到低</el-radio>
-                            <el-radio label="0" border>从低到高</el-radio>
-                        </el-radio-group>
-                    </div>
-                    <MajorPanel v-for="(v, i) in peopleDate" :key="i" :item="v">
-                        <template #people>
-                            <span class="salary"> <i class="iconfont icon-renqiredu"></i> 人气值 : <i> {{ v.popularity
-                            }}</i></span>
-                        </template>
-                        <template #btn>
-                            <el-button v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
-                                type="primary" @click="deleteCollectBtn(v.id)">
-                                <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
-                            <el-button v-else @click="addCollectBtn(v.id)"> <span><i
-                                        class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
-                        </template>
-                    </MajorPanel>
-                    <div class="demo-pagination-block">
-                        <el-pagination v-model:current-page="currentPage2" :small="small" :disabled="disabled"
-                            :background="background" layout="prev, pager, next, jumper"
-                            :total="majorStore.peopleSortInfo.length" @size-change="handleSizeChange"
-                            @current-change="handleCurrentChange" :default-page-size="10" />
-                    </div>
-                </div>
-                <!-- 空标签 -->
-                <el-empty description="啥也没搜到~" v-else />
-            </div>
-
-            <!-- 内容显示 薪酬排序 -->
-            <div v-if="rankRadio === '薪酬排序'">
-                <div v-if="salaryDate.length">
-                    <div style="margin: 10px 20px;float: right;">
-                        <el-radio-group v-model="sortWay" size="small">
-                            <el-radio label="1" border>从高到低</el-radio>
-                            <el-radio label="0" border>从低到高</el-radio>
-                        </el-radio-group>
-                    </div>
-                    <div>
-                        <MajorPanel v-for="(v, i) in salaryDate" :key="i" :item="v">
-                            <template #btn>
-                                <el-button v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
-                                    type="primary" @click="deleteCollectBtn(v.id)">
-                                    <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
-                                <el-button v-else @click="addCollectBtn(v.id)"> <span><i
-                                            class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
-                            </template>
-                        </MajorPanel>
-                    </div>
-                    <div class="demo-pagination-block">
-                        <el-pagination v-model:current-page="currentPage3" :small="small" :disabled="disabled"
-                            :background="background" layout="prev, pager, next, jumper"
-                            :total="majorStore.salarySortInfo.length" @size-change="handleSizeChange"
-                            @current-change="handleCurrentChange" :default-page-size="10" />
-                    </div>
-                </div>
-                <!-- 空标签 -->
-                <el-empty description="啥也没搜到~" v-else />
-            </div>
-
         </div>
         <div class="right-box"><br><br><br>
             <h1>右 <br> 边</h1>

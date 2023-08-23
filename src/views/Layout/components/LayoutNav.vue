@@ -56,7 +56,12 @@ const exitHandler = () => {
     .search {
         width: 380px;
         margin-left: 90px;
-        margin-right: -5px;
+    }
+
+    ::v-deep .el-input__wrapper {
+        border-top-right-radius: 0;
+        border-bottom-right-radius: 0;
+        margin-right: -3px;
     }
 
     .welcome {
