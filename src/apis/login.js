@@ -86,5 +86,14 @@ export const getUserApi = (data) => {
     })
 }
 
-
-
+//根据成绩获取排名
+export const getMyRankApi = (data) => {
+    return http({
+        url: '/recommend/getRanking',
+        method: 'POST',
+        data,
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+}

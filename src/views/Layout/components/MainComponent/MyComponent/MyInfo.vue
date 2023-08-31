@@ -1,7 +1,7 @@
 <script setup>
 import 'element-plus/es/components/message/style/css'
 import { ElMessage } from 'element-plus'
-import { onMounted, ref } from 'vue'
+import { onMounted, ref ,watch} from 'vue'
 import { useUserStore } from '@/stores/user'
 import { nextTick } from 'vue'
 const userStore = useUserStore()
@@ -31,9 +31,21 @@ const validatePass = (rule, value, callback) => {
 }
 //表单验证规则
 const rules = ref({
-    // hometown: [
-    //     { required: true, message: '请选择省份', trigger: 'blur' },
-    // ],
+
+    province: [
+        {
+            required: true,
+            message: '请选择省',
+            trigger: 'blur',
+        },
+    ],
+    city: [
+        {
+            required: true,
+            message: '请选择市',
+            trigger: 'blur',
+        },
+    ],
     high_school: [
         { required: true, message: '请填写学校', trigger: 'blur' },
     ],
@@ -79,12 +91,13 @@ const submitForm = async (formEl) => {
 
     if (!formEl) return
     await formEl.validate(async (valid) => {
-        if (!userStore.userInfo.user_id) ElMessage.warning("请先登录")
+        if (!userStore.loginInfo.user_id) ElMessage.warning("请先登录")
         else {
             if (valid) {
                 //修改用户信息
                 console.log(form.value);
                 await userStore.addInformation(form.value)
+                await userStore.getInformation({ user_id: userStore.loginInfo.user_id })
                 ElMessage({
                     message: '保存成功',
                     type: 'success',
@@ -111,9 +124,9 @@ const passable = ref(false)
 const password = ref('')
 onMounted(async () => {
     //获取用户信息赋值为form
-    if (!userStore.userInfo.user_id) ElMessage.warning("请先登录")
+    if (!userStore.loginInfo.user_id) ElMessage.warning("请先登录")
     else {
-        await userStore.getInformation({ user_id: userStore.userInfo.user_id })
+        await userStore.getInformation({ user_id: userStore.loginInfo.user_id })
         form.value = JSON.parse(JSON.stringify(userStore.userInfo))
     }
 })
@@ -159,6 +172,17 @@ const passtwo = async () => {
 // const passblur = () => {
 //     passable.value = false
 // }
+let timer = null
+//分数改变自动改变排名  节流
+watch(() => form.value.score, async () => {
+    if (timer) clearTimeout(timer)
+    timer = setTimeout(async () => {
+        await userStore.getMyRank({ score: form.value.score })
+        form.value.score_rank = userStore.userInfo.score_rank
+        clearTimeout(timer)
+        timer = null
+    }, 500);
+})
 </script>
 <template>
     <div class="countain">
@@ -171,7 +195,7 @@ const passtwo = async () => {
                     </div>
                 </template>
                 <el-form label-width="120px">
-                    <el-form-item class="avator_container"  label="头像">
+                    <el-form-item class="avator_container" label="头像">
                         <span class="avator"><img
                                 src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png" /></span>
                     </el-form-item>
@@ -180,26 +204,28 @@ const passtwo = async () => {
                     </el-form-item>
                     <el-form-item label="昵称">
 
-                        <span class="padding-left-20px" v-if="!nickable">{{ userStore.loginInfo.nickname }} <el-button @click="nickone" class="button"
-                                text> <i class="iconfont icon-bianji-"></i>&nbsp;
+                        <span class="padding-left-20px" v-if="!nickable">{{ userStore.loginInfo.nickname }} <el-button
+                                @click="nickone" class="button" text> <i class="iconfont icon-bianji-"></i>&nbsp;
                                 编辑</el-button></span>
-                        <span class="padding-left-20px" v-else style="display: flex;"><el-input v-model="nickname" @blur="nickblur" ref="nickinput"
-                                placeholder="Please input" /><el-button @click="nicktwo" class="button" text> <i
-                                    class="iconfont icon-Save"></i>&nbsp;保存</el-button><el-button @click="nickable = false"
-                                class="button" text> <i class="iconfont icon-quxiao"></i>&nbsp; 取消</el-button></span>
+                        <span class="padding-left-20px" v-else style="display: flex;"><el-input v-model="nickname"
+                                @blur="nickblur" ref="nickinput" placeholder="Please input" /><el-button @click="nicktwo"
+                                class="button" text> <i class="iconfont icon-Save"></i>&nbsp;保存</el-button><el-button
+                                @click="nickable = false" class="button" text> <i class="iconfont icon-quxiao"></i>&nbsp;
+                                取消</el-button></span>
                     </el-form-item>
 
                     <el-form-item label="修改密码">
-                        <span class="padding-left-20px" v-if="!passable">******<el-button @click="passone" class="button" text>
+                        <span class="padding-left-20px" v-if="!passable">******<el-button @click="passone" class="button"
+                                text>
                                 <i class="iconfont icon-bianji-"></i>&nbsp; 编辑</el-button></span>
-                        <span class="padding-left-20px" v-else style="display: flex;"><el-input v-model="password" @blur="passblur"
-                                ref="passinput" placeholder="Please input" /><el-button @click="passtwo" class="button"
-                                text><i class="iconfont icon-Save"></i>&nbsp;保存</el-button><el-button
+                        <span class="padding-left-20px" v-else style="display: flex;"><el-input v-model="password"
+                                @blur="passblur" ref="passinput" placeholder="Please input" /><el-button @click="passtwo"
+                                class="button" text><i class="iconfont icon-Save"></i>&nbsp;保存</el-button><el-button
                                 @click="passable = false" class="button" text> <i class="iconfont icon-quxiao"></i>&nbsp;
                                 取消</el-button></span>
                     </el-form-item>
-                    <el-form-item  style="margin-top: 30px;padding-left: 15px;">
-                        <el-button  type="danger" @click="delete_account">注销账户</el-button>
+                    <el-form-item style="margin-top: 30px;padding-left: 15px;">
+                        <el-button type="danger" @click="delete_account">注销账户</el-button>
                     </el-form-item>
                 </el-form>
             </el-card>
@@ -218,18 +244,20 @@ const passtwo = async () => {
                 </template>
                 <el-form :model="form" :rules="rules" ref="formEl" label-width="120px" :disabled="disabled">
 
-                    <el-form-item label="生源地" prop="hometown">
+                    <el-form-item label="省" prop="province">
 
                         <!-- <el-form-item label="生源地" prop="hometown"> -->
-                        <el-select v-model="form.province" placeholder="省" @change="form_province.city = ''">
+                        <el-select v-model="form.province" placeholder="省" @change="form.city = ''">
                             <el-option v-for="(item, key) in userStore.provinceInfo" :key="key" :label="key" :value="key" />
                         </el-select>
+
+                    </el-form-item>
+                    <el-form-item label="市" prop="city">
                         <el-select v-model="form.city" placeholder="市">
                             <el-option v-for="(item, index) in userStore.provinceInfo[form.province]" :key="index"
                                 :label="item" :value="item" />
                         </el-select>
                     </el-form-item>
-
 
                     <el-form-item label="学校名" prop="high_school">
                         <div style="width: 230px;"><el-input v-model="form.high_school" placeholder="请填写学校" />
@@ -258,13 +286,13 @@ const passtwo = async () => {
                     </el-form-item>
 
                     <el-form-item label="分数" prop="score">
-                        <el-input-number v-model="form.score" class="mx-4" :min="1" :max="1000" controls-position="right"
-                            @change="handleChange" />
+                        <el-input-number v-model="form.score" class="mx-4" :min="0" :max="750" controls-position="right"
+                            @change="handleScoreChange" />
                     </el-form-item>
 
                     <el-form-item label="位次" prop="score_rank">
-                        <el-input-number v-model="form.score_rank" class="mx-4" :min="1" :max="1000"
-                            controls-position="right" @change="handleChange" />
+                        <el-input-number v-model="form.score_rank" class="mx-4" :min="1" controls-position="right"
+                            @change="handleChange" />
                     </el-form-item>
 
 
@@ -288,9 +316,11 @@ const passtwo = async () => {
     height: 60px;
     line-height: 60px;
 }
+
 .padding-left-20px {
     padding-left: 20px;
 }
+
 ::v-deep .el-checkbox-button.is-disabled.is-checked .el-checkbox-button__inner {
     background-color: #F2F6FC;
 }

@@ -59,7 +59,7 @@ onMounted(async () => {
 // 搜索按钮
 const btndisabled = ref(false)
 const searchBtn = async () => {
-    if(btndisabled.value) return 
+    if (btndisabled.value) return
     btndisabled.value = true
     await sendRequest()
     btndisabled.value = false
@@ -88,11 +88,13 @@ const defaultDate = computed(() => {
 })
 //人气排序的数据
 const peopleDate = computed(() => {
-    return majorStore.peopleSortInfo.slice((10 * (currentPage2.value - 1)), (10 * currentPage2.value)) || []
+    if (Object.keys(majorStore.peopleSortInfo).length === 0) return []
+    return majorStore.peopleSortInfo.slice((10 * (currentPage2.value - 1)), (10 * currentPage2.value))
 })
 //薪酬排序的数据
 const salaryDate = computed(() => {
-    return majorStore.salarySortInfo.slice((10 * (currentPage3.value - 1)), (10 * currentPage3.value)) || []
+    if (Object.keys(majorStore.salarySortInfo).length === 0) return []
+    return majorStore.salarySortInfo.slice((10 * (currentPage3.value - 1)), (10 * currentPage3.value))
 })
 
 //取消收藏按钮
@@ -165,7 +167,7 @@ const addCollectBtn = async (item_id) => {
                 </el-radio-group>
                 <div ref="loadoneEl">
                     <!-- 内容显示 默认排序 -->
-                    <div class="demo-collapse" v-if="rankRadio === '默认排序'" >
+                    <div class="demo-collapse" v-if="rankRadio === '默认排序'">
                         <div v-if="defaultDate.length">
                             <el-collapse>
                                 <el-collapse-item v-for="(value, index) in defaultDate" :title="value.category_name"
@@ -173,12 +175,12 @@ const addCollectBtn = async (item_id) => {
                                     <div v-for="(item, index) in value.major_classes" :key="index">
                                         <h2 style="color: lightgreen;">{{ item.class_name }}</h2>
                                         <MajorPanel v-for="(v, i) in item.majors" :key="i" :item="v">
+
                                             <template #btn>
                                                 <el-button
                                                     v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
                                                     type="primary" @click="deleteCollectBtn(v.id)">
-                                                    <span><i
-                                                            class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
+                                                    <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏 </span></el-button>
                                                 <el-button v-else @click="addCollectBtn(v.id)"> <span><i
                                                             class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
                                             </template>
@@ -197,7 +199,7 @@ const addCollectBtn = async (item_id) => {
                         <el-empty description="啥也没搜到~" v-else />
                     </div>
                     <!-- 内容显示 人气排序 -->
-                    <div v-if="rankRadio === '人气排序'" >
+                    <div v-if="rankRadio === '人气排序'">
                         <div v-if="peopleDate.length">
                             <div style="margin: 10px 20px;float: right;">
                                 <el-radio-group v-model="sortWayPeople" size="small">
@@ -211,11 +213,12 @@ const addCollectBtn = async (item_id) => {
                                     }}</i></span>
                                 </template>
                                 <template #btn>
+                                    
                                     <el-button
-                                        v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
-                                        type="primary" @click="deleteCollectBtn(v.id)">
+                                        v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.major_id) !== -1"
+                                        type="primary" @click="deleteCollectBtn(v.major_id)">
                                         <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
-                                    <el-button v-else @click="addCollectBtn(v.id)"> <span><i
+                                    <el-button v-else @click="addCollectBtn(v.major_id)"> <span><i
                                                 class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
                                 </template>
                             </MajorPanel>
@@ -242,10 +245,10 @@ const addCollectBtn = async (item_id) => {
                                 <MajorPanel v-for="(v, i) in salaryDate" :key="i" :item="v">
                                     <template #btn>
                                         <el-button
-                                            v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
-                                            type="primary" @click="deleteCollectBtn(v.id)">
+                                            v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.major_id) !== -1"
+                                            type="primary" @click="deleteCollectBtn(v.major_id)">
                                             <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
-                                        <el-button v-else @click="addCollectBtn(v.id)"> <span><i
+                                        <el-button v-else @click="addCollectBtn(v.major_id)"> <span><i
                                                     class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
                                     </template>
                                 </MajorPanel>

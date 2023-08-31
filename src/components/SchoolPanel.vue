@@ -16,7 +16,7 @@ const props = defineProps({
             <div class="info-top"><span class="info-name">{{ props.name }}</span><span class="info-location">{{
                 props.location }}</span></div>
             <div class="flex flex-wrap gap-2 my-2">
-                <el-tag v-for="item in props.tags" :key="item" class="mx-1" effect="dark" round>
+                <el-tag v-show="item" v-for="item in props.tags" :key="item" class="mx-1" effect="dark" round>
                     {{ item }}
                 </el-tag>
             </div>
@@ -48,7 +48,6 @@ const props = defineProps({
         overflow: hidden;
         width: 60px;
         height: 60px;
-
         img {
             width: 100%;
             height: 100%;
@@ -56,17 +55,22 @@ const props = defineProps({
     }
 
     .info {
-        padding: 18px 50px;
+        padding:18px;
         padding-right: 0;
         flex: 1;
         height: 100%;
 
         .info-top {
             .info-name {
+                display: inline-block;
                 font-size: 18px;
                 line-height: 20px;
                 font-weight: 600;
                 cursor: pointer;
+                max-width: 300px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
 
             .info-location {
@@ -80,7 +84,7 @@ const props = defineProps({
     }
 
     .btn {
-        width: 300px;
+        width: 200px;
     }
 
     .el-tag {

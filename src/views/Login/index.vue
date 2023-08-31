@@ -4,8 +4,6 @@ import { ElMessage } from 'element-plus'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 const router = useRouter()
-//导入登陆注册接口
-import { loginApi, registerApi } from '@/apis/login'
 import { useUserStore } from '@/stores/user'
 const userStore = useUserStore()
 
@@ -108,7 +106,7 @@ const registerForm = async (registerRef) => {
     <section class="login-section">
       <div class="wrapper">
         <nav>
-          <a href="javascript:;">账户登录</a>
+          <a href="javascript:;">{{ login?'账户登录':'账户注册' }}</a>
         </nav>
         <div class="account-box">
           <div class="form" v-if="login">

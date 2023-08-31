@@ -22,10 +22,10 @@ const exitHandler = () => {
             <el-input v-model="input" placeholder="搜大学 查专业" size="large" />
         </div>
         <el-button type="primary" size="large">搜索</el-button>
-        <div class="welcome" v-if="userStore.userInfo.user_id">欢迎：{{ userStore.userInfo.user_id }}</div>
+        <div class="welcome" v-if="userStore.loginInfo.user_id">欢迎：{{ userStore.loginInfo.user_id }}</div>
         <div class="welcome" v-else>请先登录</div>
         <div class="login">
-            <el-button type="primary" v-if="userStore.userInfo.user_id" @click="exitHandler">退出</el-button>
+            <el-button type="primary" v-if="userStore.loginInfo.user_id" @click="exitHandler">退出</el-button>
             <el-button type="primary" v-else> <RouterLink to="/login">登录/注册</RouterLink> </el-button>
         </div>
     </div>

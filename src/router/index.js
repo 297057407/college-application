@@ -36,6 +36,10 @@ const router = createRouter({
           path: 'schooldetail/:id',
           component: () => import('../views/Layout/components/MainComponent/schoolDetail.vue')
         },
+        {
+          path: 'fillform',
+          component: () => import('../views/Layout/components/MainComponent/fillForm.vue')
+        },
       ]
     },
     {
