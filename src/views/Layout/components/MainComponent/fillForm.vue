@@ -101,7 +101,7 @@ const submitForm = async (formEl) => {
                     type: 'success',
                 })
                 current_info.value = {
-                    省市: `${form.value.province},${form.value.city}`,
+                    省市: `${form.value.province} ${form.value.city}`,
                     年级: form.value.grade,
                     选科: form.value.subject.join(','),
                     分数: form.value.score,
@@ -133,7 +133,7 @@ onMounted(async () => {
         form.value = JSON.parse(JSON.stringify(userStore.userInfo))
         //初始化左侧信息
         current_info.value = {
-            省市: `${form.value.province},${form.value.city}`,
+            省市: `${form.value.province} ${form.value.city}`,
             年级: form.value.grade,
             选科: form.value.subject.join(','),
             分数: form.value.score,
@@ -156,7 +156,7 @@ watch(() => form.value.score, async () => {
 })
 
 //修改信息
-const changeinfo = async() => {
+const changeinfo = async () => {
     dialogFormVisible.value = true
     //初始化弹出框
     await userStore.getInformation({ user_id: userStore.loginInfo.user_id })
@@ -231,6 +231,11 @@ const changeinfo = async() => {
     </el-dialog>
     <div class="container">
         <div class="left-box">
+            <ul class="operation-info">
+                <li>一键生成</li>
+                <li>智能推荐</li>
+                <li>我的志愿表</li>
+            </ul>
             <div class="current-info">
                 <h4 style="text-align: center;">当前信息</h4>
                 <ul class="info-body">
@@ -240,6 +245,7 @@ const changeinfo = async() => {
                 </ul>
                 <el-button type="primary" style="margin-left: 55px;" @click="changeinfo">修改信息</el-button>
             </div>
+
         </div>
         <div class="right-box">
             <ul class="header-box">
@@ -277,6 +283,22 @@ const changeinfo = async() => {
         margin-right: 20px;
         height: 500px;
         background-color: pink;
+
+        .current-info {
+            padding: 10px 0;
+            border: 1px solid #666;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .operation-info {
+            border: 1px solid #666;
+            border-radius: 10px;
+            padding: 10px 0;
+            li {
+                padding-left: 30px;
+            }
+        }
 
         .info-li {
             padding-left: 30px;

@@ -3,10 +3,9 @@ import 'element-plus/es/components/message/style/css'
 import { ElMessage } from 'element-plus'
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-const router = useRouter()
 import { useUserStore } from '@/stores/user'
 const userStore = useUserStore()
-
+const router = useRouter()
 
 //控制登陆注册切换
 const login = ref(true)
@@ -16,15 +15,15 @@ const loginRuleForm = ref({
   username: '',
   password: ''
 })
-
+//登录表单规则
 const loginRules = ref({
   username: [
-    { required: true, message: 'Please input Activity name', trigger: 'blur' },
-    { min: 1, max: 12, message: 'Length should be 1 to 12', trigger: 'blur' },
+    { required: true, message: '用户名不能为空', trigger: 'blur' },
+    { min: 1, max: 12, message: '长度应为1-12位', trigger: 'blur' },
   ],
   password: [
-    { required: true, message: 'Please input Activity name', trigger: 'blur' },
-    { min: 1, max: 12, message: 'Length should be 1 to 12', trigger: 'blur' },
+    { required: true, message: '密码不能为空', trigger: 'blur' },
+    { min: 1, max: 12, message: '长度应为1-12位', trigger: 'blur' },
   ]
 })
 //提交登录表单
@@ -36,14 +35,16 @@ const loginForm = async (loginRef) => {
       const res = await userStore.login(loginRuleForm.value)
       if (res.status === "success") {
         ElMessage.success(res.message)
+        //后端验证通过进入主页
         router.push('/')
-      } 
+      }
       else {
+        //验证不通过提示错误
         ElMessage.warning(res.message)
       }
     }
-     else {
-      console.log('error submit!', fields)
+    else {
+      console.log('提交失败!', fields)
     }
   })
 }
@@ -54,19 +55,19 @@ const registerRuleForm = ref({
   password: '',
   email: ''
 })
-
+//注册的表单规则
 const registerRules = ref({
   username: [
-    { required: true, message: 'Please input Activity name', trigger: 'blur' },
-    { min: 1, max: 12, message: 'Length should be 1 to 12', trigger: 'blur' },
+    { required: true, message: '用户名不能为空', trigger: 'blur' },
+    { min: 1, max: 12, message: '长度应为1-12位', trigger: 'blur' },
   ],
   password: [
-    { required: true, message: 'Please input Activity name', trigger: 'blur' },
-    { min: 1, max: 12, message: 'Length should be 1 to 12', trigger: 'blur' },
+    { required: true, message: '密码不能为空', trigger: 'blur' },
+    { min: 1, max: 12, message: '长度应为1-12位', trigger: 'blur' },
   ],
   email: [
-    { required: true, message: 'Please input Activity name', trigger: 'blur' },
-    { min: 1, max: 20, message: 'Length should be 1 to 20', trigger: 'blur' },
+    { required: true, message: '邮箱不能为空', trigger: 'blur' },
+    { min: 1, max: 20, message: '长度应为1-20位', trigger: 'blur' },
   ]
 })
 //提交注册表单
@@ -89,9 +90,8 @@ const registerForm = async (registerRef) => {
 }
 
 </script>
-
 <template>
-  <div>
+  <div class="login-container">
     <header class="login-header">
       <div class="container">
         <h1 class="logo">
@@ -106,7 +106,7 @@ const registerForm = async (registerRef) => {
     <section class="login-section">
       <div class="wrapper">
         <nav>
-          <a href="javascript:;">{{ login?'账户登录':'账户注册' }}</a>
+          <a href="javascript:;">{{ login ? '账户登录' : '账户注册' }}</a>
         </nav>
         <div class="account-box">
           <div class="form" v-if="login">
@@ -144,7 +144,6 @@ const registerForm = async (registerRef) => {
         </div>
       </div>
     </section>
-
     <footer class="login-footer">
       <div class="container">
         <p>
@@ -161,111 +160,132 @@ const registerForm = async (registerRef) => {
 </template>
 
 <style scoped lang='scss'>
-.login-header {
-  border-bottom: 1px solid #e4e4e4;
+.login-container {
+  width: 100vw;
+  height: 100vh;
+  background-image: url('@/assets/images/bg2.jpg');
+  background-repeat: no-repeat;
+  background-size: 100%, 100%;
 
-  .container {
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-  }
+  .login-header {
+    border-bottom: 1px solid #e4e4e4;
 
-  .logo {
-    height: 100px;
-    line-height: 100px;
-
-    i {
-      // display: block;
-      color: skyblue;
-      font-size: 60px;
+    .container {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
     }
 
+    .logo {
+      height: 100px;
+      line-height: 100px;
+
+      i {
+        color: skyblue;
+        font-size: 60px;
+      }
+
+    }
+
+    .entry {
+      width: 120px;
+      height: 100px;
+      line-height: 100px;
+      font-size: 16px;
+      color: #fff;
+    }
   }
 
-  .entry {
-    width: 120px;
-    height: 100px;
-    line-height: 100px;
-    font-size: 16px;
+  .login-section {
+    height: 540px;
+    position: relative;
+
+    .wrapper {
+
+
+      box-sizing: content-box;
+      padding: 50px;
+      height: 380px;
+      border-radius: 50%;
+      width: 380px;
+      background-color: rgba(0, 0, 0, .5);
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
+
+      nav {
+        font-size: 14px;
+        height: 55px;
+        margin-bottom: 20px;
+        border-bottom: 1px solid #f5f5f5;
+        display: flex;
+        padding: 0 40px;
+        text-align: right;
+        align-items: center;
+
+        a {
+          flex: 1;
+          line-height: 1;
+          display: inline-block;
+          font-size: 18px;
+          position: relative;
+          text-align: center;
+          color: #fff;
+
+        }
+
+      }
+    }
   }
-}
 
-.login-section {
-  height: 560px;
-  position: relative;
+  .login-footer {
 
-  .wrapper {
-    width: 380px;
-    background: #fff;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(100px, -50%);
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.15);
-
-    nav {
-      font-size: 14px;
-      height: 55px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #f5f5f5;
-      display: flex;
-      padding: 0 40px;
-      text-align: right;
-      align-items: center;
+    p {
+      text-align: center;
+      color: #999;
+      padding-top: 20px;
 
       a {
-        flex: 1;
         line-height: 1;
+        padding: 0 10px;
+        color: #999;
         display: inline-block;
-        font-size: 18px;
-        position: relative;
-        text-align: center;
+
+        ~a {
+          border-left: 1px solid #ccc;
+        }
       }
     }
   }
-}
 
-.login-footer {
-  padding: 30px 0 50px;
+  .account-box {
+    .gotoA {
+      display: block;
+      float: right;
+      padding: 10px 0 15px 0;
+      text-decoration: underline;
+      color: #fff;
+    }
 
-  p {
-    text-align: center;
-    color: #999;
-    padding-top: 20px;
+    ::v-deep .el-form-item__label {
+      color: #fff;
+    }
 
-    a {
-      line-height: 1;
-      padding: 0 10px;
-      color: #999;
-      display: inline-block;
+    .form {
+      padding: 0 20px 20px 20px;
 
-      ~a {
-        border-left: 1px solid #ccc;
+      .code {
+        width: 100px;
       }
-    }
-  }
-}
 
-.account-box {
-  .gotoA {
-    display: block;
-    float: right;
-    padding: 10px 0 15px 0;
-    text-decoration: underline;
-  }
-
-  .form {
-    padding: 0 20px 20px 20px;
-
-    .code {
-      width: 100px;
     }
 
   }
 
-}
-
-.subBtn {
-  width: 100%;
+  .subBtn {
+    width: 100%;
+  }
 }
 </style>

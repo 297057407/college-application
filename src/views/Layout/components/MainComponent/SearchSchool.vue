@@ -19,28 +19,14 @@ const selected = ref({
     tags: [],
     type: '全部'
 })
-
+//加载的组件
 const loadEl = ref(null)
 const curloadEl = ref(null)
-onMounted(async () => {
-    const loading = ElLoading.service({
-        text: '玩命加载中...',
-        target: loadEl.value
-    })
-    //获取分类信息
-    await schoolStore.getCategory()
-    //获取学校数据
-    await schoolStore.getSchoolInfo()
-    //获取收藏信息
-    await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 1 })
-    loading.close()
-})
 
-
-//搜索按钮
+//搜索确定按钮
 const btndisabled = ref(false)
 const searchBtn = () => {
-    if(btndisabled.value) return 
+    if (btndisabled.value) return
     btndisabled.value = true
     const loading = ElLoading.service({
         text: '玩命加载中...',
@@ -52,6 +38,26 @@ const searchBtn = () => {
 
 }
 
+//分页
+const currentPage = ref(1)
+const currentPageData = computed(() => {
+    return schoolStore.allSchoolInfo.slice((10 * (currentPage.value - 1)), (10 * currentPage.value))
+})
+//初始化
+onMounted(async () => {
+    const loading = ElLoading.service({
+        text: '玩命加载中...',
+        target: loadEl.value
+    })
+    //获取分类信息
+    if(!schoolStore.categoryInfo)  await schoolStore.getCategory()
+    //获取学校数据
+    console.log(schoolStore.allSchoolInfo.value);
+    if(!schoolStore.allSchoolInfo)  await schoolStore.getSchoolInfo()
+    //获取收藏信息
+    await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 1 })
+    loading.close()
+})
 //监听筛选选项变化
 watch(selected, () => {
     const loading = ElLoading.service({
@@ -64,14 +70,6 @@ watch(selected, () => {
 }, {
     deep: true,
 })
-
-//分页
-const currentPage = ref(1)
-
-const currentPageData = computed(() => {
-    return schoolStore.allSchoolInfo.slice((10 * (currentPage.value - 1)), (10 * currentPage.value))
-})
-
 //取消收藏按钮
 const deleteCollectBtn = async (item_id) => {
     await collectStore.favoriteDelete({
@@ -104,69 +102,72 @@ const addCollectBtn = async (item_id) => {
                     <el-button type="primary" @click="searchBtn">搜索</el-button>
                 </div>
                 <br>
-                <el-tab-pane class="border" label="院校大全" >
+                <el-tab-pane class="border" label="院 校 大 全">
                     <div ref="loadEl">
                         <div class="institution-affiliation">
-                        <span>院校所属 > </span>
-                        <div class="tag">
-                            <el-radio-group v-model="selected.location" size="large">
-                                <el-radio-button label="全部" />
-                                <el-radio-button v-for="item in schoolStore.categoryInfo.location" :label="item"
-                                    :key="item" />
-                            </el-radio-group>
+                            <span>院校所属 > </span>
+                            <div class="tag">
+                                <el-radio-group v-model="selected.location" size="large">
+                                    <el-radio-button label="全部" />
+                                    <el-radio-button v-for="item in schoolStore.categoryInfo.location" :label="item"
+                                        :key="item" />
+                                </el-radio-group>
+                            </div>
                         </div>
-                    </div>
-                    <div class="institution-affiliation">
-                        <span>院校类型 > </span>
-                        <div class="tag">
-                            <el-radio-group v-model="selected.type" size="large">
-                                <el-radio-button label="全部" />
-                                <el-radio-button v-for="item in schoolStore.categoryInfo.type" :label="item" :key="item" />
-                            </el-radio-group>
+                        <div class="institution-affiliation">
+                            <span>院校类型 > </span>
+                            <div class="tag">
+                                <el-radio-group v-model="selected.type" size="large">
+                                    <el-radio-button label="全部" />
+                                    <el-radio-button v-for="item in schoolStore.categoryInfo.type" :label="item"
+                                        :key="item" />
+                                </el-radio-group>
+                            </div>
                         </div>
-                    </div>
-                    <div class="institution-affiliation">
-                        <span>办学类型 > </span>
-                        <div class="tag">
-                            <el-radio-group v-model="selected.level" size="large">
-                                <el-radio-button label="全部" />
-                                <el-radio-button v-for="item in schoolStore.categoryInfo.level" :label="item" :key="item" />
-                            </el-radio-group>
+                        <div class="institution-affiliation">
+                            <span>办学类型 > </span>
+                            <div class="tag">
+                                <el-radio-group v-model="selected.level" size="large">
+                                    <el-radio-button label="全部" />
+                                    <el-radio-button v-for="item in schoolStore.categoryInfo.level" :label="item"
+                                        :key="item" />
+                                </el-radio-group>
+                            </div>
                         </div>
-                    </div>
-                    <div class="institution-affiliation">
-                        <span>院校特色 > </span>
-                        <div class="tag">
-                            <el-checkbox-group v-model="selected.tags" size="large">
-                                <el-checkbox-button v-for="item in schoolStore.categoryInfo.tags" :key="item" :label="item">
-                                    {{ item }}
-                                </el-checkbox-button>
-                            </el-checkbox-group>
+                        <div class="institution-affiliation">
+                            <span>院校特色 > </span>
+                            <div class="tag">
+                                <el-checkbox-group v-model="selected.tags" size="large">
+                                    <el-checkbox-button v-for="item in schoolStore.categoryInfo.tags" :key="item"
+                                        :label="item">
+                                        {{ item }}
+                                    </el-checkbox-button>
+                                </el-checkbox-group>
+                            </div>
                         </div>
-                    </div>
-                    <div v-if="currentPageData.length" ref="curloadEl">
-                        <SchoolPanel class="infinite-list-item" v-for="item in currentPageData" :key="item.id"
-                            :name="item.name" :location="item.location" :tags="item.tags.split('/')">
-                            <template #btn>
-                                <el-button v-if="collectStore.collectSchool.findIndex(v => v.item_id === item.id) !== -1"
-                                    type="primary" @click="deleteCollectBtn(item.id)">
-                                    <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
-                                <el-button v-else @click="addCollectBtn(item.id)"> <span><i
-                                            class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
-                            </template>
-                        </SchoolPanel>
-                        <div class="demo-pagination-block">
-                            <el-pagination v-model:current-page="currentPage" layout="prev, pager, next, jumper"
-                                :total="schoolStore.allSchoolInfo.length" @size-change="handleSizeChange"
-                                @current-change="handleCurrentChange">
-                            </el-pagination>
+                        <div v-if="currentPageData.length" ref="curloadEl">
+                            <SchoolPanel class="infinite-list-item" v-for="item in currentPageData" :key="item.id"
+                                :name="item.name" :location="item.location" :tags="item.tags.split('/')">
+                                <template #btn>
+                                    <el-button
+                                        v-if="collectStore.collectSchool.findIndex(v => v.item_id === item.id) !== -1"
+                                        type="primary" @click="deleteCollectBtn(item.id)">
+                                        <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏</span></el-button>
+                                    <el-button v-else @click="addCollectBtn(item.id)"> <span><i
+                                                class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
+                                </template>
+                            </SchoolPanel>
+                            <div class="demo-pagination-block">
+                                <el-pagination v-model:current-page="currentPage" layout="prev, pager, next, jumper"
+                                    :total="schoolStore.allSchoolInfo.length" @size-change="handleSizeChange"
+                                    @current-change="handleCurrentChange">
+                                </el-pagination>
+                            </div>
                         </div>
-                    </div>
-                    <!-- 空标签 -->
-                    <el-empty description="啥也没搜到~" v-else />
+                        <!-- 空标签 -->
+                        <el-empty description="啥也没搜到~" v-else />
                     </div>
                 </el-tab-pane>
-                <el-tab-pane label="大学分数线">大学分数线</el-tab-pane>
             </el-tabs>
         </div>
         <div class="right-box"><br><br><br>
@@ -175,15 +176,18 @@ const addCollectBtn = async (item_id) => {
     </div>
 </template>
 <style scoped  lang="scss">
+//院校大全文字右侧颜色
 ::v-deep .el-tabs--border-card>.el-tabs__header {
     background-color: #fff;
 }
 
+//分页样式
 ::v-deep .demo-pagination-block {
     margin: 30px 150px;
     margin-right: 0;
 }
 
+//院校特色复选框格式
 ::v-deep .el-checkbox-button__inner {
     border: none;
     margin: 5px;
@@ -191,21 +195,19 @@ const addCollectBtn = async (item_id) => {
 
 ::v-deep .el-checkbox-button--large .el-checkbox-button__inner {
     padding: 6px 5px 7px 5px;
-
 }
 
 ::v-deep .el-checkbox-button:first-child .el-checkbox-button__inner {
     border: none;
 }
 
-::v-deep .el-check-tag:hover {
-    background-color: #fff;
-}
 
+//整个盒子分左右
 .searchSchool {
     display: flex;
 }
 
+// 搜索框样式
 .search {
     height: 50px;
     position: relative;
@@ -225,18 +227,20 @@ const addCollectBtn = async (item_id) => {
     }
 }
 
+//左边盒子
 .left-box {
     width: 800px;
 }
 
+// 右边盒子
 .right-box {
     width: 370px;
     margin-left: 30px;
 }
 
+//筛选条件样式
 .institution-affiliation {
     display: flex;
-    // align-items: center;
     margin-bottom: 20px;
 
     span {
@@ -248,15 +252,27 @@ const addCollectBtn = async (item_id) => {
     }
 }
 
-::v-deep .demo-tabs .custom-tabs-label .el-icon {
-    vertical-align: middle;
+::v-deep .el-radio-button--large .el-radio-button__inner {
+    padding: 6px 5px 7px 5px;
+    margin: 5px;
+    border: 0;
 }
 
-::v-deep .demo-tabs .custom-tabs-label span {
-    vertical-align: middle;
-    margin-left: 4px;
+::v-deep .el-radio-button__original-radio:checked+.el-radio-button__inner {
+    background-color: #fff;
+    color: var(--el-color-primary);
+    box-shadow: none;
+}
+::v-deep .el-checkbox-button {
+    --el-checkbox-button-checked-bg-color: var(--el-color-white);
+    --el-checkbox-button-checked-text-color: var(--el-color-primary);
+}
+::v-deep .el-checkbox-button.is-checked .el-checkbox-button__inner {
+    box-shadow: none;
 }
 
+
+// 大盒子边框
 ::v-deep .el-tabs--border-card {
     background: var(--el-bg-color-overlay);
     border: 1px solid var(--el-border-color);
@@ -264,37 +280,15 @@ const addCollectBtn = async (item_id) => {
     border-right: 0;
 }
 
-::v-deep .el-radio-button--large .el-radio-button__inner {
-    padding: 6px 5px 7px 5px;
-    margin: 5px;
-    border: 0;
-}
-
-::v-deep .el-radio-button:first-child .el-radio-button__inner {
-    border-left: none;
-}
 
 
-::v-deep .el-radio-button__original-radio:checked+.el-radio-button__inner {
-    background-color: #fff;
-    color: var(--el-color-primary);
-    box-shadow: none;
-}
 
-::v-deep .el-checkbox-button {
-    --el-checkbox-button-checked-bg-color: var(--el-color-white);
-    --el-checkbox-button-checked-text-color: var(--el-color-primary);
-}
-
-::v-deep .el-checkbox-button.is-checked .el-checkbox-button__inner {
-    box-shadow: none;
-}
-
+//院校大全四个字样式
 ::v-deep .el-tabs__item {
     padding: 32px;
     color: #6b778c;
     font-size: 24px;
-    font-weight: 500;
+    font-weight: 700;
 }
 </style>
   

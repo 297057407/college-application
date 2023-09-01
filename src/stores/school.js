@@ -16,15 +16,7 @@ export const useSchoolStore = defineStore('school', () => {
         const res = await getSchoolInfoApi()
         allSchoolInfo.value = res.message
     }
-    //根据搜索内容获取学校信息
-    // const getSearchInfo = (str) => {
-    //     if (str.trim() === '') {
-    //         searchInfo.value = allSchoolInfo.value
-    //     }
-    //     else {
-    //         searchInfo.value = allSchoolInfo.value.filter((item) => item.name.includes(str.trim())) || []
-    //     }
-    // }
+
     //根据筛选条件获取学校信息
     const getSchoolByTags = async (data) => {
         data.level = data.level === '全部' ? '' : data.level
