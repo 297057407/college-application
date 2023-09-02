@@ -47,8 +47,8 @@ onMounted(async () => {
         text: '玩命加载中...',
         target: loadEl.value
     })
-    //获取筛选数据
-    await majorStore.getCategoryInfo()
+    //获取筛选数据 
+    if(JSON.stringify(majorStore.categoryInfo) === '{}') await majorStore.getCategoryInfo()
     //获取默认排序的专业数据
     await majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, 'search_name': search_name.value })
     //获取收藏信息
@@ -180,7 +180,8 @@ const addCollectBtn = async (item_id) => {
                                                 <el-button
                                                     v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.id) !== -1"
                                                     type="primary" @click="deleteCollectBtn(v.id)">
-                                                    <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏 </span></el-button>
+                                                    <span><i class="iconfont icon-shoucang6"></i>&nbsp;已收藏
+                                                    </span></el-button>
                                                 <el-button v-else @click="addCollectBtn(v.id)"> <span><i
                                                             class="iconfont icon-shoucang1"></i>&nbsp;收藏</span></el-button>
                                             </template>
@@ -213,7 +214,7 @@ const addCollectBtn = async (item_id) => {
                                     }}</i></span>
                                 </template>
                                 <template #btn>
-                                    
+
                                     <el-button
                                         v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.major_id) !== -1"
                                         type="primary" @click="deleteCollectBtn(v.major_id)">

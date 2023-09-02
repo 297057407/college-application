@@ -1,8 +1,10 @@
 <script setup>
-import { ref } from 'vue'
-const leftList = ref([{ name: '会员中心' }, { name: '个人资料' }, { name: '我的收藏' }, { name: '我的志愿表' }, { name: '我的订单' }, { name: '意见反馈' }, { name: '用户协议' }, { name: '隐私政策' }, { name: '联系客服' }])
-//左侧选中下标
-const i = ref(1)
+import { onMounted } from 'vue'
+import { useMyformStore } from '@/stores/myform.js'
+const myformStore = useMyformStore()
+onMounted(()=> {
+    myformStore.setIndex(1)
+})
 </script>
 <template>
     <div class="common-layout">
@@ -12,8 +14,8 @@ const i = ref(1)
                     <div class="avator">Q</div> <span>177****6170</span>
                 </div>
                 <ul>
-                    <li :class="{ active: index === i }" v-for="(item, index) in leftList" :key="index" @click="i = index">
-                        <RouterLink to="/my/myinfo"><i class="iconfont icon-yonghu"></i> {{ item.name }}</RouterLink>
+                    <li :class="{ active: index === myformStore.i }" v-for="(item, index) in myformStore.leftList" :key="index" @click="myformStore.setIndex(index)">
+                        <RouterLink :to="item.path"><i class="iconfont icon-yonghu"></i> {{ item.name }}</RouterLink>
                     </li>
                 </ul>
             </el-aside>

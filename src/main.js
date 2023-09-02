@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import VueLazyload from 'vue3-lazyload';
 import App from './App.vue'
 import router from './router'
 //组件中文化
@@ -13,6 +14,14 @@ const pinia = createPinia()
 const app = createApp(App)
 pinia.use(piniaPluginPersistedstate)
 app.use(ElementPlus, { locale })
+//图片懒加载
+app.use(VueLazyload, {
+    // 配置选项
+    // preLoad: 1.3, // 图片的预加载高度比例
+    // error: 'error.jpg', // 图片加载失败时显示的图片
+    // loading: 'loading.gif', // 图片加载中显示的图片
+    // attempt: 3, // 尝试加载图片的次数
+});
 app.use(pinia)
 app.use(router)
 app.use(directivePlugin)

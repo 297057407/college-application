@@ -60,7 +60,6 @@ export const useMajorStore = defineStore('major', () => {
     // }
     return {
         categoryInfo, getCategoryInfo, searchInfo, getSearchInfoByTags, getSortBySalary, salarySortInfo, getSortByPeople, peopleSortInfo
-    
     }
 })
 

@@ -4,7 +4,7 @@ import { ElMessage } from 'element-plus'
 // 创建axios实例
 const http = axios.create({
   baseURL: 'https://p7571184p7.zicp.fun',
-  timeout: 5000
+  timeout: 50000
 })
 
 // axios请求拦截器

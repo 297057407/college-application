@@ -19,11 +19,13 @@ export const useSchoolStore = defineStore('school', () => {
 
     //根据筛选条件获取学校信息
     const getSchoolByTags = async (data) => {
+        data = JSON.parse(JSON.stringify(data))
         data.level = data.level === '全部' ? '' : data.level
         data.location = data.location === '全部' ? '' : data.location
         data.type = data.type === '全部' ? '' : data.type
         const res = await getSchoolByTagsApi(data)
         allSchoolInfo.value = res.message
+        allSchoolInfo.value.total_results = res.total_results
     }
 
 
@@ -33,6 +35,7 @@ export const useSchoolStore = defineStore('school', () => {
         data = JSON.parse(JSON.stringify(data))
         data.tags = data.tags.join(',')
         data.page = page
+        console.log(data);
         const res = await getSchoolRankingApi(data)
         schoolRankInfo.value = res
     }

@@ -115,8 +115,8 @@ const registerForm = async (registerRef) => {
               <el-form-item label="账号" prop="username">
                 <el-input v-model="loginRuleForm.username" />
               </el-form-item>
-              <el-form-item label="密码" prop="password">
-                <el-input v-model="loginRuleForm.password" />
+              <el-form-item label="密码" prop="password" >
+                <el-input v-model="loginRuleForm.password" type="password" />
               </el-form-item>
               <el-form-item label="验证码">
                 <el-input class="code" />
@@ -132,7 +132,7 @@ const registerForm = async (registerRef) => {
                 <el-input v-model="registerRuleForm.username" />
               </el-form-item>
               <el-form-item label="密码" prop="password">
-                <el-input v-model="registerRuleForm.password" />
+                <el-input v-model="registerRuleForm.password"  />
               </el-form-item>
               <el-form-item label="邮箱" prop="email">
                 <el-input v-model="registerRuleForm.email" />
@@ -163,9 +163,9 @@ const registerForm = async (registerRef) => {
 .login-container {
   width: 100vw;
   height: 100vh;
-  background-image: url('@/assets/images/bg2.jpg');
+  background-image: url('@/assets/images/bg3.jpg');
   background-repeat: no-repeat;
-  background-size: 100%, 100%;
+  background-size: 100% 100%;
 
   .login-header {
     border-bottom: 1px solid #e4e4e4;
@@ -192,7 +192,7 @@ const registerForm = async (registerRef) => {
       height: 100px;
       line-height: 100px;
       font-size: 16px;
-      color: #fff;
+      color: black;
     }
   }
 
@@ -208,7 +208,7 @@ const registerForm = async (registerRef) => {
       height: 380px;
       border-radius: 50%;
       width: 380px;
-      background-color: rgba(0, 0, 0, .5);
+      background-color: rgba(0, 0, 0, .2);
       position: absolute;
       left: 50%;
       top: 50%;
@@ -232,7 +232,7 @@ const registerForm = async (registerRef) => {
           font-size: 18px;
           position: relative;
           text-align: center;
-          color: #fff;
+          color: black;
 
         }
 
@@ -266,11 +266,11 @@ const registerForm = async (registerRef) => {
       float: right;
       padding: 10px 0 15px 0;
       text-decoration: underline;
-      color: #fff;
+      color: blak;
     }
 
     ::v-deep .el-form-item__label {
-      color: #fff;
+      color: black;
     }
 
     .form {

@@ -26,7 +26,16 @@ const router = createRouter({
           children: [{
             path: '',
             component: () => import('../views/Layout/components/MainComponent/MyComponent/MyInfo.vue')
-          }]
+          },
+          {
+            path: 'myform',
+            component: () => import('../views/Layout/components/MainComponent/MyComponent/MyForm.vue')
+          },
+          {
+            path: 'myformdetail/:id',
+            component: () => import('../views/Layout/components/MainComponent/MyComponent/MyFormDetail.vue')
+          }
+        ]
         },
         {
           path: 'schoolrank',

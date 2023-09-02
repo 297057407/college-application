@@ -32,7 +32,7 @@ const searchBtn = () => {
         text: '玩命加载中...',
         target: curloadEl.value || loadEl.value
     })
-    schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value })
+    schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value, page: 1 })
     loading.close()
     btndisabled.value = false
 
@@ -40,9 +40,9 @@ const searchBtn = () => {
 
 //分页
 const currentPage = ref(1)
-const currentPageData = computed(() => {
-    return schoolStore.allSchoolInfo.slice((10 * (currentPage.value - 1)), (10 * currentPage.value))
-})
+// const currentPageData = computed(() => {
+//     return schoolStore.allSchoolInfo.slice((10 * (currentPage.value - 1)), (10 * currentPage.value))
+// })
 //初始化
 onMounted(async () => {
     const loading = ElLoading.service({
@@ -50,23 +50,22 @@ onMounted(async () => {
         target: loadEl.value
     })
     //获取分类信息
-    if(!schoolStore.categoryInfo)  await schoolStore.getCategory()
+    if (JSON.stringify(schoolStore.categoryInfo) === '{}') await schoolStore.getCategory()
     //获取学校数据
-    console.log(schoolStore.allSchoolInfo.value);
-    if(!schoolStore.allSchoolInfo)  await schoolStore.getSchoolInfo()
+    // if (JSON.stringify(schoolStore.allSchoolInfo) === '[]') await schoolStore.getSchoolInfo()
+    await schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value, page: 1 })
     //获取收藏信息
     await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 1 })
     loading.close()
 })
 //监听筛选选项变化
-watch(selected, () => {
+watch(selected, async () => {
     const loading = ElLoading.service({
         text: '玩命加载中...',
         target: curloadEl.value || loadEl.value
     })
-    schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value })
+    await schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value, page: 1 })
     loading.close()
-
 }, {
     deep: true,
 })
@@ -91,6 +90,15 @@ const addCollectBtn = async (item_id) => {
     await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 1 })
     ElMessage.success("添加收藏成功")
 }
+//监听分页变化
+watch(currentPage, async () => {
+    const loading = ElLoading.service({
+        text: '玩命加载中...',
+        target: curloadEl.value || loadEl.value
+    })
+    await schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value, page: currentPage.value })
+    loading.close()
+})
 </script>
 <template>
     <div class="searchSchool">
@@ -145,8 +153,8 @@ const addCollectBtn = async (item_id) => {
                                 </el-checkbox-group>
                             </div>
                         </div>
-                        <div v-if="currentPageData.length" ref="curloadEl">
-                            <SchoolPanel class="infinite-list-item" v-for="item in currentPageData" :key="item.id"
+                        <div v-if="schoolStore.allSchoolInfo.length" ref="curloadEl">
+                            <SchoolPanel class="infinite-list-item" v-for="item in schoolStore.allSchoolInfo" :key="item.id"
                                 :name="item.name" :location="item.location" :tags="item.tags.split('/')">
                                 <template #btn>
                                     <el-button
@@ -159,9 +167,9 @@ const addCollectBtn = async (item_id) => {
                             </SchoolPanel>
                             <div class="demo-pagination-block">
                                 <el-pagination v-model:current-page="currentPage" layout="prev, pager, next, jumper"
-                                    :total="schoolStore.allSchoolInfo.length" @size-change="handleSizeChange"
+                                    :total="schoolStore.allSchoolInfo.total_results" @size-change="handleSizeChange"
                                     @current-change="handleCurrentChange">
-                                </el-pagination>
+                                </el-pagination> 
                             </div>
                         </div>
                         <!-- 空标签 -->
@@ -263,10 +271,12 @@ const addCollectBtn = async (item_id) => {
     color: var(--el-color-primary);
     box-shadow: none;
 }
+
 ::v-deep .el-checkbox-button {
     --el-checkbox-button-checked-bg-color: var(--el-color-white);
     --el-checkbox-button-checked-text-color: var(--el-color-primary);
 }
+
 ::v-deep .el-checkbox-button.is-checked .el-checkbox-button__inner {
     box-shadow: none;
 }

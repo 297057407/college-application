@@ -3,8 +3,11 @@ import 'element-plus/es/components/message/style/css'
 import { ElMessage } from 'element-plus'
 import { onMounted, ref, watch } from 'vue'
 import { useUserStore } from '@/stores/user'
-
+import { useSchoolStore } from '@/stores/school.js'
+import { useRecommendStore } from '@/stores/recommend.js'
+const schoolStore = useSchoolStore()
 const userStore = useUserStore()
+const recommendStore = useRecommendStore()
 //组件对象
 const formEl = ref(null)
 //form双向绑定对象
@@ -19,8 +22,15 @@ const form = ref({
     score_rank: '',
     exam_type: ""
 })
+//筛选框
+const selected = ref({
+    level: '全部',
+    location: '全部',
+    tags: [],
+    type: '全部'
+})
 //控制弹出框
-const dialogFormVisible = ref(true)
+const dialogFormVisible = ref(false)
 const click_close = ref(false)
 //复选框验证规则
 const validatePass = (rule, value, callback) => {
@@ -85,7 +95,15 @@ const rules = ref({
 
 //当前信息
 const current_info = ref({})
-
+//当前志愿表信息
+const current_form = ref({
+    "score": '',
+    "rank": '',
+    "location": "",
+    "type": "综合",
+    "level": "本科",
+    "tags": []
+})
 //提交表单
 const submitForm = async (formEl) => {
     if (!formEl) return
@@ -108,6 +126,26 @@ const submitForm = async (formEl) => {
                     排名: form.value.score_rank,
                     类型: `${form.value.exam_type}类`
                 }
+                //获取推荐志愿信息
+                await recommendStore.getRecommend({
+                    "score": form.value.score,
+                    "rank": form.value.score_rank,
+                    "location": "",
+                    "type": "综合",
+                    "level": "本科",
+                    "tags": []
+                })
+                //获取成功
+                ElMessage.success('已生成志愿表')
+                //当前志愿表信息
+                current_form.value = {
+                    "score": form.value.score,
+                    "rank": form.value.score_rank,
+                    "location": "",
+                    "type": "综合",
+                    "level": "本科",
+                    "tags": []
+                }
                 //关闭弹窗
                 dialogFormVisible.value = false
             } else {
@@ -122,9 +160,36 @@ const resetForm = async (formEl) => {
     formEl.resetFields()
     console.log(form.value);
 }
-
+//一键获取志愿+完善信息
+const initilize = async () => {
+    if (form.value.score) {
+        await recommendStore.getRecommend({
+            "score": form.value.score,
+            "rank": form.value.score_rank,
+            "location": selected.value.location,
+            "type": selected.value.type,
+            "level": selected.value.level,
+            "tags": selected.value.tags
+        })
+        //当前志愿表信息
+        current_form.value = {
+            "score": form.value.score,
+            "rank": form.value.score_rank,
+            "location": selected.value.location,
+            "type": selected.value.type,
+            "level": selected.value.level,
+            "tags": selected.value.tags
+        }
+        ElMessage.success('已生成志愿表')
+    } else {
+        dialogFormVisible.value = true
+        ElMessage.warning('请先完善信息')
+    }
+}
 
 onMounted(async () => {
+    //获取分类信息
+    if (JSON.stringify(schoolStore.categoryInfo) === '{}') await schoolStore.getCategory()
     //获取用户信息赋值为form
     if (!userStore.loginInfo.user_id) ElMessage.warning("请先登录")
     else {
@@ -138,8 +203,9 @@ onMounted(async () => {
             选科: form.value.subject.join(','),
             分数: form.value.score,
             排名: form.value.score_rank,
-            类型: `${form.value.exam_type}类`
+            类型: `${form.value.exam_type}`
         }
+        await initilize()
     }
 })
 
@@ -161,7 +227,43 @@ const changeinfo = async () => {
     //初始化弹出框
     await userStore.getInformation({ user_id: userStore.loginInfo.user_id })
     form.value = JSON.parse(JSON.stringify(userStore.userInfo))
-} 
+}
+//展开筛选条件
+const expand = ref(false)
+const expand_btn = () => {
+    expand.value = !expand.value
+}
+
+//一键生成志愿
+const generate_btn = async () => {
+    await initilize()
+}
+//重置筛选条件
+const reset_btn = () => {
+    selected.value = {
+        level: '全部',
+        location: '全部',
+        tags: [],
+        type: '全部'
+    }
+}
+//将志愿表添加到我的志愿
+const add_btn = async () => {
+    if (JSON.stringify(recommendStore.recommendList) === '[]') ElMessage.warning('请先一键生成志愿表')
+    else {
+        const list = recommendStore.recommendList.map(v => {
+            return v.id
+        })
+        await recommendStore.addRecommend(
+            {
+                user_id: userStore.loginInfo.user_id,
+                list,
+                introduction: `分数: ${current_form.value.score} | 排名: ${current_form.value.rank} | 属地: ${current_form.value.location} | 院校类型: ${current_form.value.type} | 办学类型: ${current_form.value.level} | 特色: ${current_form.value.tags.join('/')}`
+            }
+        )
+        ElMessage.success('已添加至我的志愿')
+    }
+}
 </script>
 <template>
     <el-dialog :close-on-click-modal="click_close" v-model="dialogFormVisible" center title="请填写学生信息" width="40%">
@@ -179,13 +281,6 @@ const changeinfo = async () => {
                         :value="item" />
                 </el-select>
             </el-form-item>
-
-            <!-- 
-            <el-form-item label="学校名" prop="high_school">
-                <div style="width: 230px;"><el-input v-model="form.high_school" placeholder="请填写学校" />
-                </div>
-            </el-form-item> -->
-
             <el-form-item label="年级" prop="grade">
                 <el-radio-group v-model="form.grade">
                     <el-radio-button label="高一" />
@@ -231,11 +326,11 @@ const changeinfo = async () => {
     </el-dialog>
     <div class="container">
         <div class="left-box">
-            <ul class="operation-info">
+            <!-- <ul class="operation-info">
                 <li>一键生成</li>
                 <li>智能推荐</li>
                 <li>我的志愿表</li>
-            </ul>
+            </ul> -->
             <div class="current-info">
                 <h4 style="text-align: center;">当前信息</h4>
                 <ul class="info-body">
@@ -248,57 +343,195 @@ const changeinfo = async () => {
 
         </div>
         <div class="right-box">
+            <button class="custom-button" :class="{ 'btn-zhankai': expand, 'btn-shouqi': !expand }" style="width: 100%;"
+                @click="expand_btn">{{ expand ? '收起' : '展开' }}筛选条件</button>
+            <div style="overflow: hidden;margin-top: -5px;">
+                <transition name="slide-down">
+                    <div class="shaixuan" v-show="expand">
+                        <div class="institution-affiliation">
+                            <span>院校所属 > </span>
+                            <div class="tag">
+                                <el-radio-group v-model="selected.location" size="large">
+                                    <el-radio-button label="全部" />
+                                    <el-radio-button v-for="item in schoolStore.categoryInfo.location" :label="item"
+                                        :key="item" />
+                                </el-radio-group>
+                            </div>
+                        </div>
+                        <div class="institution-affiliation">
+                            <span>院校类型 > </span>
+                            <div class="tag">
+                                <el-radio-group v-model="selected.type" size="large">
+                                    <el-radio-button label="全部" />
+                                    <el-radio-button v-for="item in schoolStore.categoryInfo.type" :label="item"
+                                        :key="item" />
+                                </el-radio-group>
+                            </div>
+                        </div>
+                        <div class="institution-affiliation">
+                            <span>办学类型 > </span>
+                            <div class="tag">
+                                <el-radio-group v-model="selected.level" size="large">
+                                    <el-radio-button label="全部" />
+                                    <el-radio-button v-for="item in schoolStore.categoryInfo.level" :label="item"
+                                        :key="item" />
+                                </el-radio-group>
+                            </div>
+                        </div>
+
+                        <div class="institution-affiliation">
+                            <span>院校特色 > </span>
+                            <div class="tag">
+                                <el-checkbox-group v-model="selected.tags" size="large">
+                                    <el-checkbox-button v-for="item in schoolStore.categoryInfo.tags" :key="item"
+                                        :label="item">
+                                        {{ item }}
+                                    </el-checkbox-button>
+                                </el-checkbox-group>
+                            </div>
+                        </div>
+                        <div class="btn-operation">
+                            <a href="javascript:void(0)" class="custom-button" @click="add_btn"> <i
+                                    class="iconfont icon-tianjia"></i>
+                                将该志愿表添加的我的志愿</a>
+                            <a href="javascript:void(0)" class="custom-button" @click="generate_btn"> <i
+                                    class="iconfont icon-shengchengshili"></i> 根据筛选条件一键生成志愿</a>
+                            <a href="javascript:void(0)" class="custom-button" @click="reset_btn"> <i
+                                    class="iconfont icon-icon--gengxin"></i> 重置筛选条件</a>
+                        </div>
+                    </div>
+                </transition>
+            </div>
+
+
             <ul class="header-box">
-                <li>录取概率</li>
-                <li>招生院校专业组</li>
-                <li>院校代码</li>
+                <li>大学名称</li>
+                <li>招生计划</li>
                 <li>分数</li>
-                <li>操作</li>
+                <li>位次</li>
+                <li>专业名称</li>
             </ul>
             <ul class="body-box">
-                <li>
+                <li v-for="v in recommendStore.recommendList" :key="v.id">
                     <div class="div">
-                        <span class="chance">50% 稳</span>
+                        <span>{{ v.university }} </span>
+                        <span>院校代码: {{ v.university_code }}</span>
                     </div>
                     <div class="div">
-                        <h4>清华大学</h4>
-                        <div><span>公办</span></div>
+                        <span>{{ v.num_students }}</span>
                     </div>
-                    <div class="div">A003</div>
-                    <div class="div">699</div>
-                    <div class="div"><el-button style="color: #1d7efe;border-color: #1d7efe;">查看可选专业</el-button></div>
+                    <div class="div">
+                        <span>{{ v.score }}</span>
+                    </div>
+                    <div class="div">
+                        <span>{{ v.ranking }}</span>
+                    </div>
+                    <div class="div">
+                        <span>{{ v.major }}</span>
+                        <span>专业代码: {{ v.major_code }}</span>
+                    </div>
                 </li>
             </ul>
         </div>
     </div>
 </template>
 <style scoped lang="scss">
+//自定义按钮
+.custom-button {
+    color: #007bff;
+    border: none;
+    /* 设置边框样式 */
+    padding: 10px 20px;
+    /* 设置内边距 */
+    border-radius: 5px;
+    /* 设置圆角 */
+    /* 添加其他样式以满足您的需求 */
+}
+
+.btn-zhankai {
+    background-color: #007bff;
+    color: #fff;
+}
+
+.btn-showqi {
+    background-color: #909399;
+    color: black;
+}
+
+//按钮容器
+.btn-operation {
+    display: flex;
+    justify-content: space-between;
+
+    button {
+        width: 400px;
+        background-color: #007bff;
+
+    }
+}
+
+
+/* 定义进入动画 */
+.slide-down-enter-active {
+    animation: slide-down-enter 0.5s ease-in-out;
+}
+
+.slide-down-leave-active {
+    animation: slide-down-leave 0.5s ease-in-out;
+}
+
+@keyframes slide-down-enter {
+    from {
+        height: 0px;
+        // transform: translateY(-100%);
+    }
+
+    to {
+        height: 270px;
+        // transform: translateY(0);
+    }
+}
+
+@keyframes slide-down-leave {
+    from {
+        height: 270px;
+        // transform: translateY(0);
+    }
+
+    to {
+        height: 0px;
+        // transform: translateY(-100%);
+    }
+}
+
+
 .container {
     display: flex;
     width: 100%;
+    background-color: #fff;
 
     .left-box {
         padding: 15px;
         width: 230px;
-        margin-right: 20px;
+        // margin-right: 20px;
         height: 500px;
-        background-color: pink;
 
         .current-info {
             padding: 10px 0;
-            border: 1px solid #666;
+            border: 1px solid #c0bebe;
             border-radius: 10px;
             margin-top: 10px;
         }
 
-        .operation-info {
-            border: 1px solid #666;
-            border-radius: 10px;
-            padding: 10px 0;
-            li {
-                padding-left: 30px;
-            }
-        }
+        // .operation-info {
+        //     border: 1px solid #909399;
+        //     border-radius: 10px;
+        //     padding: 10px 0;
+
+        //     li {
+        //         padding-left: 30px;
+        //     }
+        // }
 
         .info-li {
             padding-left: 30px;
@@ -307,23 +540,30 @@ const changeinfo = async () => {
     }
 
     .right-box {
+
         padding: 15px;
         flex: 1;
-        height: 500px;
-        background-color: green;
+        // background-color: green;
 
         .header-box {
+            // padding-left: 20px;
+            margin-top: 10px;
+            border-radius: 10px 10px 0 0;
+            background-color: #fafafa;
             display: flex;
             height: 60px;
             line-height: 60px;
-            background-color: pink;
+
+            li {
+                text-align: center;
+            }
 
             li:nth-child(1) {
-                flex: 1;
+                flex: 3;
             }
 
             li:nth-child(2) {
-                flex: 3;
+                flex: 2;
             }
 
             li:nth-child(3) {
@@ -339,41 +579,38 @@ const changeinfo = async () => {
             }
         }
 
+        .shaixuan {
+            padding: 10px 20px 0 20px;
+            border: 1px solid #d8d6d6;
+            border-top: 0;
+            border-radius: 0 0 10px 10px;
+        }
+
         .body-box {
-            display: flex;
             background-color: #fff;
+            // padding-left: 20px;
 
             li {
                 width: 100%;
                 display: flex;
                 height: 80px;
-                line-height: 80px;
+                border-bottom: 1px dotted #909399;
 
-                .div:nth-child(1) {
-                    flex: 1;
-
-                    .chance {
-                        padding: 5px 10px;
-                        background-color: #e2f0ff;
-                        border-radius: 5px;
-                        color: #1d7efe;
-                    }
+                .div {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
 
-                .div:nth-child(2) {
+                .div:nth-child(1) {
                     flex: 3;
                     display: flex;
                     flex-direction: column;
-                    justify-content: center;
+                    justify-content: space-evenly;
+                }
 
-                    div {
-                        line-height: 1;
-                    }
-
-                    h4 {
-                        line-height: 1;
-                        margin-bottom: 10px;
-                    }
+                .div:nth-child(2) {
+                    flex: 2;
                 }
 
                 .div:nth-child(3) {
@@ -386,6 +623,9 @@ const changeinfo = async () => {
 
                 .div:nth-child(5) {
                     flex: 3;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-evenly;
                 }
             }
         }
@@ -398,5 +638,57 @@ const changeinfo = async () => {
 
 ::v-deep .el-input__wrapper {
     margin-right: 10px;
+}
+
+
+
+
+
+//筛选条件样式
+.institution-affiliation {
+    display: flex;
+    margin-bottom: 10px;
+
+    span {
+        padding-top: 8px;
+    }
+
+    .tag {
+        flex: 1;
+    }
+}
+
+::v-deep .el-radio-button--large .el-radio-button__inner {
+    padding: 6px 5px 7px 5px;
+    margin: 5px;
+    border: 0;
+}
+
+::v-deep .el-radio-button__original-radio:checked+.el-radio-button__inner {
+    background-color: #fff;
+    color: var(--el-color-primary);
+    box-shadow: none;
+}
+
+::v-deep .el-checkbox-button {
+    --el-checkbox-button-checked-bg-color: var(--el-color-white);
+    --el-checkbox-button-checked-text-color: var(--el-color-primary);
+}
+
+::v-deep .el-checkbox-button.is-checked .el-checkbox-button__inner {
+    box-shadow: none;
+}
+
+::v-deep .el-checkbox-button__inner {
+    border: none;
+    margin: 5px;
+}
+
+::v-deep .el-checkbox-button--large .el-checkbox-button__inner {
+    padding: 6px 5px 7px 5px;
+}
+
+::v-deep .el-checkbox-button:first-child .el-checkbox-button__inner {
+    border: none;
 }
 </style>

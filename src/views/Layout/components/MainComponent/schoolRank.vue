@@ -177,7 +177,7 @@ const reset = async () => {
                     <div class="base-info flex-box">
                         <img style="width: 60px;
                         height: 60px;
-                        background-color: black;border-radius: 50%;" src="" alt="">
+                      border-radius: 50%;" v-lazy="`https://p7571184p7.zicp.fun/img/picture/${v.name}.jpeg`|| ''" alt="">
                         <div class="right">
                             <div class="right-info schoolname">{{ v.name }}</div>
                             <div class="right-info nature">{{ v.is_public }}</div>

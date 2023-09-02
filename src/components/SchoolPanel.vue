@@ -11,7 +11,9 @@ const props = defineProps({
         <div class="rank">
             <!-- <v-slot></v-slot> -->
         </div>
-        <div class="img"><img src="@/assets/images/140.jpg" alt=""></div>
+        <div class="img"><img
+                v-lazy="`https://p7571184p7.zicp.fun/img/${props.name}.jpeg`|| ''"
+                alt=""></div>
         <div class="info">
             <div class="info-top"><span class="info-name">{{ props.name }}</span><span class="info-location">{{
                 props.location }}</span></div>
@@ -22,7 +24,7 @@ const props = defineProps({
             </div>
         </div>
         <div class="btn">
-           <slot name="btn"></slot>
+            <slot name="btn"></slot>
         </div>
     </li>
 </template>
@@ -48,6 +50,7 @@ const props = defineProps({
         overflow: hidden;
         width: 60px;
         height: 60px;
+
         img {
             width: 100%;
             height: 100%;
@@ -55,7 +58,7 @@ const props = defineProps({
     }
 
     .info {
-        padding:18px;
+        padding: 18px;
         padding-right: 0;
         flex: 1;
         height: 100%;
@@ -90,5 +93,4 @@ const props = defineProps({
     .el-tag {
         margin: 15px 10px 0 0;
     }
-}
-</style>
+}</style>
