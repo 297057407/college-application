@@ -2,7 +2,7 @@
 import { onMounted } from 'vue'
 import { useMyformStore } from '@/stores/myform.js'
 const myformStore = useMyformStore()
-onMounted(()=> {
+onMounted(() => {
     myformStore.setIndex(1)
 })
 </script>
@@ -14,7 +14,8 @@ onMounted(()=> {
                     <div class="avator">Q</div> <span>177****6170</span>
                 </div>
                 <ul>
-                    <li :class="{ active: index === myformStore.i }" v-for="(item, index) in myformStore.leftList" :key="index" @click="myformStore.setIndex(index)">
+                    <li :class="{ active: index === myformStore.i }" v-for="(item, index) in myformStore.leftList"
+                        :key="index" @click="myformStore.setIndex(index)">
                         <RouterLink :to="item.path"><i class="iconfont icon-yonghu"></i> {{ item.name }}</RouterLink>
                     </li>
                 </ul>
@@ -29,10 +30,12 @@ onMounted(()=> {
 .common-layout {
     background-color: #fff;
     margin-top: 30px;
-
+    padding: 10px;
 
 
     .aside {
+        box-shadow: var(--el-box-shadow-light);
+
         .info-top {
             display: flex;
             justify-content: space-between;
@@ -60,6 +63,11 @@ onMounted(()=> {
         li {
             padding: 10px;
             border-radius: 5px;
+            a {
+                display: inline-block;
+                width: 100%;
+                height: 100%;
+            }
         }
 
         li.active {

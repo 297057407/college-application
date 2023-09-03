@@ -16,9 +16,12 @@ onMounted(async () => {
     }
 })
 //跳转到志愿表详情
-const form_detail = (id) => {
+const form_detail = (id,introduction) => {
     router.push({
         path: `/my/myformdetail/${id}`, // 传递的参数
+        query: {
+            introduction
+        }
     });
 }
 //删除志愿表
@@ -35,11 +38,10 @@ const delete_form = async (index) => {
     <div class="form_container">
         <div class="form_head">
             <h2>我的志愿表</h2>
-            <hr>
             <ul>
-                <li v-for="(v, i) in myformStore.form_list" :key="i" class="form_li"><span>编号:{{ v.index
+                <li v-for="(v, i) in myformStore.form_list" :key="i" class="form_li"><span>编号: {{ v.index
                 }}</span><span>信息 : {{ v.introduction }}</span><span> <el-button type="primary"
-                            @click="form_detail(v.index)">查看志愿表</el-button> <el-button type="danger"
+                            @click="form_detail(v.index,v.introduction)">查看志愿表</el-button> <el-button type="danger"
                             @click="delete_form(v.index)">删除志愿表</el-button></span></li>
             </ul>
         </div>
@@ -52,16 +54,22 @@ const delete_form = async (index) => {
 .form_container {
     width: 100%;
     padding: 30px 20px;
-
+    .form_head {
+        h2 {
+         color: #007bff;
+         padding-bottom: 20px;
+         border-bottom: 1px dotted #007bff;
+        }
+    }
     ul {
-        border: 1px solid #999;
+        border: 1px solid #cbc9c9;
         border-bottom: none;
         border-radius: 5px;
 
         .form_li {
             padding-left: 40px;
             height: 60px;
-            border-bottom: 1px solid #999;
+            border-bottom: 1px solid #cbc9c9;
             display: flex;
             align-items: center;
 

@@ -3,7 +3,7 @@ import { useUserStore } from '@/stores/user'
 import { ElMessage } from 'element-plus'
 import 'element-plus/es/components/message/style/css'
 import { useRouter } from 'vue-router'
-const userStore =  useUserStore()
+const userStore = useUserStore()
 const router = useRouter()
 import { ref } from 'vue'
 const input = ref('')
@@ -25,8 +25,13 @@ const exitHandler = () => {
         <div class="welcome" v-if="userStore.loginInfo.user_id">欢迎：{{ userStore.loginInfo.user_id }}</div>
         <div class="welcome" v-else>请先登录</div>
         <div class="login">
-            <el-button type="primary" v-if="userStore.loginInfo.user_id" @click="exitHandler">退出</el-button>
-            <el-button type="primary" v-else> <RouterLink to="/login">登录/注册</RouterLink> </el-button>
+
+            <el-popconfirm title="确定退出？" @confirm="exitHandler()">
+                <template #reference>
+                    <el-button type="danger" v-if="userStore.loginInfo.user_id">退出</el-button>
+                </template>
+            </el-popconfirm>
+            <el-button type="primary" v-if="!userStore.loginInfo.user_id" @click="router.push('/login')">登录/注册</el-button>
         </div>
     </div>
 </template>

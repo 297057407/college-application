@@ -20,6 +20,12 @@ export const registerApi = (data) => {
         }
     })
 }
+//获取验证码
+export const getCaptchaApi = () => {
+    return http({
+        url: '/user/captcha'
+    })
+}
 //获取省市
 export const getLocationApi = () => {
     return http({
@@ -95,5 +101,13 @@ export const getMyRankApi = (data) => {
         headers: {
             'Content-Type': 'application/json'
         }
+    })
+}
+//删除用户
+export const deleteUserApi = (data) => {
+    return http({
+        url: '/user/delete',
+        method: 'POST',
+        data,
     })
 }

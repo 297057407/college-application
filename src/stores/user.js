@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { loginApi, registerApi, addInformationApi, getInformationApi, getLocationApi, updateNicknameApi, revisePasswordApi, getUserApi,getMyRankApi } from '@/apis/login'
+import { loginApi, registerApi,deleteUserApi, addInformationApi, getInformationApi, getLocationApi, updateNicknameApi, revisePasswordApi, getUserApi,getMyRankApi } from '@/apis/login'
 import { ElMessage } from 'element-plus'
 import 'element-plus/es/components/message/style/css'
 export const useUserStore = defineStore('user', () => {
@@ -17,6 +17,13 @@ export const useUserStore = defineStore('user', () => {
         loginInfo.value = res
         return res
     }
+    //注销用户
+    const deleteUser = async(data) => {
+       const res = await deleteUserApi(data)
+       return res
+    }
+    //获取验证码
+
     //注册
     const register = async (data) => {
         const res = await registerApi(data)
@@ -84,7 +91,7 @@ export const useUserStore = defineStore('user', () => {
         const res = await getMyRankApi(data)
         if(res.status === 'success') userInfo.value.score_rank = res.result
     }
-    return { userInfo, login, register, addInformation, getInformation, getProvince, provinceInfo, exit, loginInfo, updateNickname, revisePassword, getUser,getMyRank }
+    return { userInfo, login, register,addInformation, getInformation, getProvince, provinceInfo, exit, loginInfo, updateNickname, revisePassword, getUser,getMyRank,deleteUser }
 }, {
     persist: true
 })

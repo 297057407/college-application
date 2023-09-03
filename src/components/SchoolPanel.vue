@@ -12,7 +12,7 @@ const props = defineProps({
             <!-- <v-slot></v-slot> -->
         </div>
         <div class="img"><img
-                v-lazy="`https://p7571184p7.zicp.fun/img/${props.name}.jpeg`|| ''"
+                v-lazy="`https://p7571184p7.zicp.fun/img/picture/${props.name}.jpeg`|| ''"
                 alt=""></div>
         <div class="info">
             <div class="info-top"><span class="info-name">{{ props.name }}</span><span class="info-location">{{

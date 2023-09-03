@@ -1,9 +1,10 @@
 <script setup>
 import 'element-plus/es/components/message/style/css'
 import { ElMessage } from 'element-plus'
-import { onMounted, ref ,watch} from 'vue'
+import { onMounted, ref, watch } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { nextTick } from 'vue'
+import router from '@/router'
 const userStore = useUserStore()
 //组件对象
 const formEl = ref(null)
@@ -183,8 +184,47 @@ watch(() => form.value.score, async () => {
         timer = null
     }, 500);
 })
+//删除账户
+const delete_account = () => {
+    dialogFormVisible.value = true
+    depassword.value = ''
+}
+
+const dialogFormVisible = ref(false)
+
+const depassword = ref('')
+const confirm_btn = async () => {
+    const res = await userStore.deleteUser({
+        user_id: userStore.loginInfo.user_id,
+        password: depassword.value
+    })
+    if (res.message === '注销成功') {
+        userStore.exit()
+        router.replace('/')
+        ElMessage.success(res.message)
+    } else {
+        ElMessage.error(res.message)
+
+    }
+
+}
 </script>
 <template>
+    <el-dialog v-model="dialogFormVisible" title="请输入您的密码来注销账户" width="30%">
+        <el-form :model="form">
+            <el-form-item label="请输入密码" :label-width="formLabelWidth">
+                <el-input type="password"  v-model="depassword" autocomplete="off" />
+            </el-form-item>
+        </el-form>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="dialogFormVisible = false">取消</el-button>
+                <el-button @click="confirm_btn">
+                    <i class="iconfont icon--zhongdaweixian" style="color:red"> </i>&nbsp;确定注销
+                </el-button>
+            </span>
+        </template>
+    </el-dialog>
     <div class="countain">
         <div class="header">
             <el-card class="box-card">
@@ -367,5 +407,18 @@ watch(() => form.value.score, async () => {
             overflow: hidden;
         }
     }
+}
+
+//注销账户弹出框
+.el-button--text {
+    margin-right: 15px;
+}
+
+.el-input {
+    width: 300px;
+}
+
+.dialog-footer button:first-child {
+    margin-right: 10px;
 }
 </style>

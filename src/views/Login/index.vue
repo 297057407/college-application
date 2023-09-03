@@ -1,7 +1,7 @@
 <script setup>
 import 'element-plus/es/components/message/style/css'
 import { ElMessage } from 'element-plus'
-import { ref } from 'vue'
+import {  ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useUserStore } from '@/stores/user'
 const userStore = useUserStore()
@@ -13,7 +13,8 @@ const login = ref(true)
 const loginRef = ref(null)
 const loginRuleForm = ref({
   username: '',
-  password: ''
+  password: '',
+  captcha : ''
 })
 //登录表单规则
 const loginRules = ref({
@@ -24,6 +25,9 @@ const loginRules = ref({
   password: [
     { required: true, message: '密码不能为空', trigger: 'blur' },
     { min: 1, max: 12, message: '长度应为1-12位', trigger: 'blur' },
+  ],
+  captcha: [
+    { required: true, message: '请输入验证码', trigger: 'blur' },
   ]
 })
 //提交登录表单
@@ -88,9 +92,13 @@ const registerForm = async (registerRef) => {
     }
   })
 }
-
+const imgref = ref(null)
+const change = () => {
+  imgref.value.src ='https://p7571184p7.zicp.fun/user/captcha'
+}
 </script>
 <template>
+  <button @click="change">修改验证码</button>
   <div class="login-container">
     <header class="login-header">
       <div class="container">
@@ -115,11 +123,12 @@ const registerForm = async (registerRef) => {
               <el-form-item label="账号" prop="username">
                 <el-input v-model="loginRuleForm.username" />
               </el-form-item>
-              <el-form-item label="密码" prop="password" >
+              <el-form-item label="密码" prop="password">
                 <el-input v-model="loginRuleForm.password" type="password" />
               </el-form-item>
-              <el-form-item label="验证码">
-                <el-input class="code" />
+              <el-form-item label="验证码" prop="captcha">
+                <el-input v-model="loginRuleForm.captcha" class="code" />
+                <img ref="imgref" class="captcha" src="https://p7571184p7.zicp.fun/user/captcha" alt="">
               </el-form-item>
               <el-button type="primary" size="large" class="subBtn" @click="loginForm(loginRef)">点击登录</el-button>
               <a class="gotoA" href="javascript:;" @click.prevent="login = false">没有账号？去注册</a>
@@ -132,7 +141,7 @@ const registerForm = async (registerRef) => {
                 <el-input v-model="registerRuleForm.username" />
               </el-form-item>
               <el-form-item label="密码" prop="password">
-                <el-input v-model="registerRuleForm.password"  />
+                <el-input v-model="registerRuleForm.password" />
               </el-form-item>
               <el-form-item label="邮箱" prop="email">
                 <el-input v-model="registerRuleForm.email" />
@@ -169,6 +178,7 @@ const registerForm = async (registerRef) => {
 
   .login-header {
     border-bottom: 1px solid #e4e4e4;
+    margin-bottom: 10px;
 
     .container {
       display: flex;
@@ -271,13 +281,23 @@ const registerForm = async (registerRef) => {
 
     ::v-deep .el-form-item__label {
       color: black;
+      width: 100px;
+      padding-right: 7px;
     }
 
     .form {
       padding: 0 20px 20px 20px;
-
+      .captcha {
+        width: 80px;
+        height: 30px;
+        margin-left: 10px;
+      }
       .code {
-        width: 100px;
+        width: 100px!important;
+      }
+      ::v-deep .el-input {
+        width: 230px;
+        margin: 5px 0;
       }
 
     }

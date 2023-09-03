@@ -91,14 +91,24 @@ const addCollectBtn = async (item_id) => {
     ElMessage.success("添加收藏成功")
 }
 //监听分页变化
-watch(currentPage, async () => {
-    const loading = ElLoading.service({
-        text: '玩命加载中...',
-        target: curloadEl.value || loadEl.value
-    })
+// watch(currentPage, async () => {
+//     // const loading = ElLoading.service({
+//     //     text: '玩命加载中...',
+//     //     target: curloadEl.value || loadEl.value
+//     // })
+//     await schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value, page: currentPage.value })
+//     // loading.close()
+// })
+//分页器
+const handleCurrentChange = async () => {
+    // const loading = ElLoading.service({
+    //     text: '玩命加载中...',
+    //     target: loadEl.value
+    // })
     await schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value, page: currentPage.value })
-    loading.close()
-})
+    // loading.close()
+}
+
 </script>
 <template>
     <div class="searchSchool">
@@ -154,8 +164,8 @@ watch(currentPage, async () => {
                             </div>
                         </div>
                         <div v-if="schoolStore.allSchoolInfo.length" ref="curloadEl">
-                            <SchoolPanel class="infinite-list-item" v-for="item in schoolStore.allSchoolInfo" :key="item.id"
-                                :name="item.name" :location="item.location" :tags="item.tags.split('/')">
+                            <SchoolPanel v-for="item in schoolStore.allSchoolInfo" :key="item.id" :name="item.name"
+                                :location="item.location" :tags="item.tags.split('/')">
                                 <template #btn>
                                     <el-button
                                         v-if="collectStore.collectSchool.findIndex(v => v.item_id === item.id) !== -1"
@@ -167,9 +177,9 @@ watch(currentPage, async () => {
                             </SchoolPanel>
                             <div class="demo-pagination-block">
                                 <el-pagination v-model:current-page="currentPage" layout="prev, pager, next, jumper"
-                                    :total="schoolStore.allSchoolInfo.total_results" @size-change="handleSizeChange"
+                                    :total="schoolStore.allSchoolInfo.total_results/2" @size-change="handleSizeChange"
                                     @current-change="handleCurrentChange">
-                                </el-pagination> 
+                                </el-pagination>
                             </div>
                         </div>
                         <!-- 空标签 -->

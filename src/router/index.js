@@ -34,6 +34,10 @@ const router = createRouter({
           {
             path: 'myformdetail/:id',
             component: () => import('../views/Layout/components/MainComponent/MyComponent/MyFormDetail.vue')
+          },
+          {
+            path: 'mycollect',
+            component: () => import('../views/Layout/components/MainComponent/MyComponent/MyCollect.vue')
           }
         ]
         },

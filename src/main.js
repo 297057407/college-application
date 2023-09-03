@@ -18,9 +18,9 @@ app.use(ElementPlus, { locale })
 app.use(VueLazyload, {
     // 配置选项
     // preLoad: 1.3, // 图片的预加载高度比例
-    // error: 'error.jpg', // 图片加载失败时显示的图片
-    // loading: 'loading.gif', // 图片加载中显示的图片
-    // attempt: 3, // 尝试加载图片的次数
+    error: '@/assets/images/IMG404.gif', // 图片加载失败时显示的图片
+    // loading: '@/assets/images/loading.gif', // 图片加载中显示的图片
+    attempt: 2, // 尝试加载图片的次数
 });
 app.use(pinia)
 app.use(router)

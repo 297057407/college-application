@@ -27,4 +27,20 @@ export const favoriteDeleteApi = (data) => {
         data
     })
 }
+//获取收藏的学校数据
+export const getAllUniversityApi = (data) => {
+    return http({
+        url: '/favorite/getAllUniversity',
+        method: 'POST',
+        data
+    })
+}
 
+//获取收藏的专业数据
+export const getAllMajorApi = (data) => {
+    return http({
+        url: '/favorite/getAllMajor',
+        method: 'POST',
+        data
+    })
+}

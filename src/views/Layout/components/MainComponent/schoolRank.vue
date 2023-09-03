@@ -63,19 +63,18 @@ const leftNav = (i, v) => {
 
 //分页器
 const handleCurrentChange = async () => {
-    const loading = ElLoading.service({
-        text: '玩命加载中...',
-        target: loadEl.value
-    })
+    // const loading = ElLoading.service({
+    //     text: '玩命加载中...',
+    //     target: loadEl.value
+    // })
     await schoolStore.getSortedInfo(value.value, page.value)
-    loading.close()
+    // loading.close()
 }
 
 //下载排行榜
 const downloadInfo = async () => {
     ElMessage('已开始下载，请耐心等待...')
     await schoolStore.downloadRanking(value.value)
-    console.log(schoolStore.downloadInfo);
     let arr = schoolStore.downloadInfo.map((item, index) => {
         return {
             排名: index + 1,

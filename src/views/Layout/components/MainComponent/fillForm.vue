@@ -332,13 +332,14 @@ const add_btn = async () => {
                 <li>我的志愿表</li>
             </ul> -->
             <div class="current-info">
-                <h4 style="text-align: center;">当前信息</h4>
+                <h4>当前信息</h4>
                 <ul class="info-body">
                     <li class="info-li" v-for="(v, k, i) in current_info" :key="i">
                         {{ k }} : {{ v }}
                     </li>
-                </ul>
-                <el-button type="primary" style="margin-left: 55px;" @click="changeinfo">修改信息</el-button>
+                </ul> <button class="custom-button"
+                    style="margin-left: 55px;background-color: rgba(0, 123, 255, .5);color: #fff;margin-top: 10px;"
+                    @click="changeinfo">修改信息</button>
             </div>
 
         </div>
@@ -405,6 +406,7 @@ const add_btn = async () => {
 
 
             <ul class="header-box">
+                <li>编号</li>
                 <li>大学名称</li>
                 <li>招生计划</li>
                 <li>分数</li>
@@ -412,19 +414,20 @@ const add_btn = async () => {
                 <li>专业名称</li>
             </ul>
             <ul class="body-box">
-                <li v-for="v in recommendStore.recommendList" :key="v.id">
+                <li v-for="(v, i) in recommendStore.recommendList" :key="v.id">
+                    <div class="div">{{ i + 1 }}</div>
                     <div class="div">
                         <span>{{ v.university }} </span>
                         <span>院校代码: {{ v.university_code }}</span>
                     </div>
                     <div class="div">
-                        <span>{{ v.num_students }}</span>
+                        <span>{{ v.num_students }} 人</span>
                     </div>
                     <div class="div">
-                        <span>{{ v.score }}</span>
+                        <span>{{ v.score }} 分</span>
                     </div>
                     <div class="div">
-                        <span>{{ v.ranking }}</span>
+                        <span>第 {{ v.ranking }} 名</span>
                     </div>
                     <div class="div">
                         <span>{{ v.major }}</span>
@@ -438,7 +441,7 @@ const add_btn = async () => {
 <style scoped lang="scss">
 //自定义按钮
 .custom-button {
-    color: #007bff;
+    color: rgba(0, 123, 255, .5);
     border: none;
     /* 设置边框样式 */
     padding: 10px 20px;
@@ -448,8 +451,13 @@ const add_btn = async () => {
     /* 添加其他样式以满足您的需求 */
 }
 
+.custom-button2 {
+    background-color: rgba(0, 123, 255, .5);
+    color: #fff;
+}
+
 .btn-zhankai {
-    background-color: #007bff;
+    background-color: rgba(0, 123, 255, .5);
     color: #fff;
 }
 
@@ -512,15 +520,26 @@ const add_btn = async () => {
 
     .left-box {
         padding: 15px;
+        padding-top: 110px;
         width: 230px;
         // margin-right: 20px;
         height: 500px;
 
         .current-info {
-            padding: 10px 0;
-            border: 1px solid #c0bebe;
+            // padding: 10px 0;
+            border: 1px solid #f0f0f0;
             border-radius: 10px;
             margin-top: 10px;
+            overflow: hidden;
+            padding-bottom: 10px;
+
+            h4 {
+                height: 40px;
+                line-height: 40px;
+                text-align: center;
+                background-color: rgba(0, 123, 255, .5);
+                color: #FFF;
+            }
         }
 
         // .operation-info {
@@ -549,7 +568,8 @@ const add_btn = async () => {
             // padding-left: 20px;
             margin-top: 10px;
             border-radius: 10px 10px 0 0;
-            background-color: #fafafa;
+            background-color: rgba(0, 123, 255, .5);
+            color: #FFF;
             display: flex;
             height: 60px;
             line-height: 60px;
@@ -559,11 +579,11 @@ const add_btn = async () => {
             }
 
             li:nth-child(1) {
-                flex: 3;
+                flex: 1;
             }
 
             li:nth-child(2) {
-                flex: 2;
+                flex: 3;
             }
 
             li:nth-child(3) {
@@ -575,6 +595,10 @@ const add_btn = async () => {
             }
 
             li:nth-child(5) {
+                flex: 2;
+            }
+
+            li:nth-child(6) {
                 flex: 3;
             }
         }
@@ -600,17 +624,32 @@ const add_btn = async () => {
                     display: flex;
                     align-items: center;
                     justify-content: center;
+
+
                 }
 
                 .div:nth-child(1) {
+                    flex: 1;
+                    font-size: 20px;
+                    font-weight: 700;
+                }
+
+                .div:nth-child(2) {
                     flex: 3;
                     display: flex;
                     flex-direction: column;
                     justify-content: space-evenly;
-                }
 
-                .div:nth-child(2) {
-                    flex: 2;
+                    span:nth-child(1) {
+                        font-size: 18px;
+                        font-weight: 500;
+                        color: #007bff;
+                    }
+
+                    span:nth-child(2) {
+                        font-size: 12px;
+                        color: rgba(159, 159, 159, .7);
+                    }
                 }
 
                 .div:nth-child(3) {
@@ -622,6 +661,21 @@ const add_btn = async () => {
                 }
 
                 .div:nth-child(5) {
+                    flex: 2;
+                }
+
+                .div:nth-child(6) {
+                    span:nth-child(1) {
+                        font-size: 14px;
+                        font-weight: 700;
+                        color: #007bff;
+                    }
+
+                    span:nth-child(2) {
+                        font-size: 12px;
+                        color: rgba(0, 123, 255, .5);
+                    }
+
                     flex: 3;
                     display: flex;
                     flex-direction: column;
@@ -690,5 +744,4 @@ const add_btn = async () => {
 
 ::v-deep .el-checkbox-button:first-child .el-checkbox-button__inner {
     border: none;
-}
-</style>
+}</style>
