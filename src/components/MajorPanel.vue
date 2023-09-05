@@ -39,7 +39,8 @@ const props = defineProps({
     margin: 0 15px 0 4px;
 }
 .li-panel {
-    width: 780px;
+    // width: 780px;
+    width: 100%;
     height: 100px;
     display: flex;
     align-items: center;

@@ -38,6 +38,10 @@ const router = createRouter({
           {
             path: 'mycollect',
             component: () => import('../views/Layout/components/MainComponent/MyComponent/MyCollect.vue')
+          },
+          {
+            path: 'myvip',
+            component: () => import('../views/Layout/components/MainComponent/MyComponent/MyVip.vue')
           }
         ]
         },

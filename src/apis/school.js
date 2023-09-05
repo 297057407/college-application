@@ -51,3 +51,11 @@ export const downloadRankingApi = (data) => {
         data
     })
 }
+//获取学校详情
+export const getUniversityDetailsApi = (data) => {
+    return http({
+        url: '/university/getUniversityDetails',
+        method : 'POST',
+        data
+    })
+}

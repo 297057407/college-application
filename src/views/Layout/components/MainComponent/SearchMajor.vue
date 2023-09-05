@@ -267,9 +267,9 @@ const addCollectBtn = async (item_id) => {
                 </div>
             </div>
         </div>
-        <div class="right-box"><br><br><br>
+        <!-- <div class="right-box"><br><br><br>
             <h1>右 <br> 边</h1>
-        </div>
+        </div> -->
     </div>
 </template>
 <style scoped  lang="scss">
@@ -289,6 +289,7 @@ const addCollectBtn = async (item_id) => {
 
 .searchMajor {
     background-color: #fff;
+    width: 100%;
 }
 
 .demo-pagination-block {
@@ -321,7 +322,8 @@ const addCollectBtn = async (item_id) => {
 }
 
 .left-box {
-    width: 800px;
+    // width: 800px;
+    width: 100%;
     padding-left: 20px;
 }
 

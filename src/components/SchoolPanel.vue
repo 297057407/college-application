@@ -4,6 +4,10 @@ const props = defineProps({
     location: String,
     tags: Array,
 })
+const emit = defineEmits(['click-school-name'])
+const showDetrail = (name) => {
+    emit('click-school-name',name)
+}
 </script>
 
 <template>
@@ -15,7 +19,7 @@ const props = defineProps({
                 v-lazy="`https://p7571184p7.zicp.fun/img/picture/${props.name}.jpeg`|| ''"
                 alt=""></div>
         <div class="info">
-            <div class="info-top"><span class="info-name">{{ props.name }}</span><span class="info-location">{{
+            <div class="info-top"><span @click="showDetrail(props.name)" class="info-name">{{ props.name }}</span><span class="info-location">{{
                 props.location }}</span></div>
             <div class="flex flex-wrap gap-2 my-2">
                 <el-tag v-show="item" v-for="item in props.tags" :key="item" class="mx-1" effect="dark" round>

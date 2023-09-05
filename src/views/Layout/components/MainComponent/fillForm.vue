@@ -515,7 +515,8 @@ const add_btn = async () => {
 
 .container {
     display: flex;
-    width: 100%;
+    width: 1200px;
+    margin: auto;
     background-color: #fff;
 
     .left-box {

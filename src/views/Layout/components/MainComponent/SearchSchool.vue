@@ -1,5 +1,5 @@
 <script  setup>
-import { ref, onMounted, watch, computed } from 'vue'
+import { ref, onMounted, watch, onBeforeUnmount } from 'vue'
 import SchoolPanel from '@/components/SchoolPanel.vue'
 import { ElMessage } from 'element-plus'
 import 'element-plus/es/components/message/style/css'
@@ -90,15 +90,6 @@ const addCollectBtn = async (item_id) => {
     await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 1 })
     ElMessage.success("添加收藏成功")
 }
-//监听分页变化
-// watch(currentPage, async () => {
-//     // const loading = ElLoading.service({
-//     //     text: '玩命加载中...',
-//     //     target: curloadEl.value || loadEl.value
-//     // })
-//     await schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value, page: currentPage.value })
-//     // loading.close()
-// })
 //分页器
 const handleCurrentChange = async () => {
     // const loading = ElLoading.service({
@@ -108,11 +99,53 @@ const handleCurrentChange = async () => {
     await schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value, page: currentPage.value })
     // loading.close()
 }
+//以下代码保证右侧盒子在视口中央
+onMounted(() => {
+    window.addEventListener("scroll", centerChild);
+})
+onBeforeUnmount(() => {
+    window.removeEventListener("scroll", this.handleScroll);
+    if (timer.value) {
+        clearTimeout(timer.value);
+    }
+})
+const timer = ref(null)
+const parentContainer = ref(null)
+const childContainer = ref(null)
+const centerChild = () => {
+    if(!showDetail.value) return
+    if (!timer.value) {
+        timer.value = setTimeout(() => {
+            const parent = parentContainer.value.getBoundingClientRect().y
+            childContainer.value.style.top = parent > 0 ? '140px' : `${-parent + 140}px`;
+            timer.value = null
+        }, 500);
+    }
+}
 
+//点击学校名显示详情
+const showDetail = ref(false)
+const right = ref(null)
+const clickname = async (name) => {
+    const loading = ElLoading.service({
+        text: '玩命加载中...',
+        target: curloadEl.value
+    })
+    await schoolStore.getUniversityDetails({ name })
+    loading.close()
+    if (!showDetail.value) right.value.style.width = '800px'
+    showDetail.value = true
+}
+const closeIntro = () => {
+    right.value.style.width = '100%'
+    showDetail.value = false
+}
+//学校简介
+const zhankai = ref(false)
 </script>
 <template>
     <div class="searchSchool">
-        <div class="left-box">
+        <div class="left-box" ref="right">
             <el-tabs type="border-card" class="demo-tabs">
                 <div class="search">
                     <i class="iconfont icon-icon-search"></i>
@@ -122,7 +155,7 @@ const handleCurrentChange = async () => {
                 <br>
                 <el-tab-pane class="border" label="院 校 大 全">
                     <div ref="loadEl">
-                        <div class="institution-affiliation">
+                        <div class="institution-affiliation" style="width: 800px;">
                             <span>院校所属 > </span>
                             <div class="tag">
                                 <el-radio-group v-model="selected.location" size="large">
@@ -132,7 +165,7 @@ const handleCurrentChange = async () => {
                                 </el-radio-group>
                             </div>
                         </div>
-                        <div class="institution-affiliation">
+                        <div class="institution-affiliation" style="width: 800px;">
                             <span>院校类型 > </span>
                             <div class="tag">
                                 <el-radio-group v-model="selected.type" size="large">
@@ -142,7 +175,7 @@ const handleCurrentChange = async () => {
                                 </el-radio-group>
                             </div>
                         </div>
-                        <div class="institution-affiliation">
+                        <div class="institution-affiliation" style="width: 800px;">
                             <span>办学类型 > </span>
                             <div class="tag">
                                 <el-radio-group v-model="selected.level" size="large">
@@ -152,7 +185,7 @@ const handleCurrentChange = async () => {
                                 </el-radio-group>
                             </div>
                         </div>
-                        <div class="institution-affiliation">
+                        <div class="institution-affiliation" style="width: 800px;">
                             <span>院校特色 > </span>
                             <div class="tag">
                                 <el-checkbox-group v-model="selected.tags" size="large">
@@ -164,8 +197,8 @@ const handleCurrentChange = async () => {
                             </div>
                         </div>
                         <div v-if="schoolStore.allSchoolInfo.length" ref="curloadEl">
-                            <SchoolPanel v-for="item in schoolStore.allSchoolInfo" :key="item.id" :name="item.name"
-                                :location="item.location" :tags="item.tags.split('/')">
+                            <SchoolPanel @click-school-name="clickname" v-for="item in schoolStore.allSchoolInfo"
+                                :key="item.id" :name="item.name" :location="item.location" :tags="item.tags.split('/')">
                                 <template #btn>
                                     <el-button
                                         v-if="collectStore.collectSchool.findIndex(v => v.item_id === item.id) !== -1"
@@ -177,7 +210,7 @@ const handleCurrentChange = async () => {
                             </SchoolPanel>
                             <div class="demo-pagination-block">
                                 <el-pagination v-model:current-page="currentPage" layout="prev, pager, next, jumper"
-                                    :total="schoolStore.allSchoolInfo.total_results/2" @size-change="handleSizeChange"
+                                    :total="schoolStore.allSchoolInfo.total_results / 2" @size-change="handleSizeChange"
                                     @current-change="handleCurrentChange">
                                 </el-pagination>
                             </div>
@@ -188,12 +221,54 @@ const handleCurrentChange = async () => {
                 </el-tab-pane>
             </el-tabs>
         </div>
-        <div class="right-box"><br><br><br>
-            <h1>右 <br> 边</h1>
+        <div class="right-box" ref="parentContainer">
+            <div class="child-box" ref="childContainer">
+                <el-button type="info" @click="closeIntro">关闭简介</el-button>
+                <div style="text-align: center;">
+                    <img style="width: 100px;height: 100px;border-radius: 50%;"
+                        v-lazy="`https://p7571184p7.zicp.fun/img/picture/${schoolStore.schoolDetail.name}.jpeg` || ''"
+                        alt="">
+                </div>
+                <h1 style="text-align: center;margin: 10px 0;">{{ schoolStore.schoolDetail.name }}</h1>
+                <p class="schoolIntro">
+                    学校简介: {{ schoolStore.schoolDetail.introduction?.substr(0, 65) + '...' }}
+                    <a href="javascript:void(0)" @click="zhankai = !zhankai" style="color:#409eff">查看详情</a>
+
+
+                    <el-drawer v-model="zhankai" title="学校简介" :with-header="false" direction="ltr">
+                        <span>{{ schoolStore.schoolDetail.introduction || '' }}</span>
+                    </el-drawer>
+
+                </p>
+                <div class="tags">
+                    <div v-if="schoolStore.schoolDetail.qs_ranking" class="tagsDetail"><span>{{
+                        schoolStore.schoolDetail.qs_ranking }}</span><span>软科综合</span></div>
+                    <div v-if="schoolStore.schoolDetail.alumni" class="tagsDetail"><span>{{ schoolStore.schoolDetail.alumni
+                    }}</span><span>校友会综合</span></div>
+                    <div v-if="schoolStore.schoolDetail.us_world_ranking" class="tagsDetail"><span>{{
+                        schoolStore.schoolDetail.us_world_ranking }}</span><span>US世界</span></div>
+                    <div v-if="schoolStore.schoolDetail.qs_world_ranking" class="tagsDetail"><span>{{
+                        schoolStore.schoolDetail.qs_world_ranking }}</span><span>QS世界</span></div>
+                    <div v-if="schoolStore.schoolDetail.times_higher_ranking" class="tagsDetail"><span>{{
+                        schoolStore.schoolDetail.times_higher_ranking }}</span><span>泰晤士</span></div>
+                </div>
+
+                <div class="address">
+                    <span> <i class="iconfont icon-dizhi"></i> 地址: {{ schoolStore.schoolDetail.address }}</span>
+                    <span> <i class="iconfont icon-shouye1"></i> 电话: {{ schoolStore.schoolDetail.phone }}</span>
+                    <span> <i class="iconfont icon-youxiang"></i> 邮箱: {{ schoolStore.schoolDetail.email }}</span>
+                    <span> <i class="iconfont icon-wangzhi"></i> 网址1: {{ schoolStore.schoolDetail.website1 }}</span>
+                    <span> <i class="iconfont icon-wangzhi"></i> 网址2: {{ schoolStore.schoolDetail.website2 }}</span>
+                </div>
+            </div>
         </div>
     </div>
 </template>
 <style scoped  lang="scss">
+::v-deep .el-popconfirm__action {
+    display: none;
+}
+
 //院校大全文字右侧颜色
 ::v-deep .el-tabs--border-card>.el-tabs__header {
     background-color: #fff;
@@ -247,13 +322,62 @@ const handleCurrentChange = async () => {
 
 //左边盒子
 .left-box {
-    width: 800px;
+    // width: 800px;
+    width: 100%;
+    transition: all .5s;
 }
 
 // 右边盒子
 .right-box {
+    flex: 1;
+    position: relative;
     width: 370px;
     margin-left: 30px;
+    height: 2500px;
+
+    .child-box {
+        overflow: hidden;
+        position: absolute;
+        top: 200px;
+        width: 100%;
+        height: 700px;
+        transition: all .5s;
+        .address {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-evenly;
+            padding-left: 60px;
+
+            span {
+                margin-bottom: 15px;
+            }
+        }
+
+        .schoolIntro {
+            padding: 20px 50px;
+        }
+
+        .tags {
+            display: flex;
+            flex-wrap: wrap;
+            padding: 0 60px;
+            margin-bottom: 20px;
+
+            .tagsDetail {
+                display: flex;
+                flex-direction: column;
+                justify-content: space-evenly;
+                align-items: center;
+                width: 60px;
+                height: 60px;
+                margin: 10px;
+                border-radius: 10px;
+                font-size: 14px;
+                background-color: #409eff;
+                color: #fff;
+            }
+        }
+    }
 }
 
 //筛选条件样式

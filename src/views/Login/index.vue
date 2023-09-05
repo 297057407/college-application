@@ -93,17 +93,15 @@ const registerForm = async (registerRef) => {
   })
 }
 const imgref = ref(null)
-const change = () => {
-  imgref.value.src ='https://p7571184p7.zicp.fun/user/captcha'
-}
 </script>
 <template>
-  <button @click="change">修改验证码</button>
   <div class="login-container">
     <header class="login-header">
       <div class="container">
         <h1 class="logo">
-          <RouterLink to="/"><i class="iconfont icon-shouye"></i></RouterLink>
+          <RouterLink to="/">
+            <img src="@/assets/images/logo3.png" alt="">
+          </RouterLink>
         </h1>
         <RouterLink class="entry" to="/">
           进入网站首页

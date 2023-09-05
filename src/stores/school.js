@@ -1,11 +1,12 @@
 import { ref } from 'vue'
 import { defineStore } from 'pinia'
-import { getSchoolInfoApi, getSchoolByTagsApi, getCategoryApi, getSchoolRankingApi,downloadRankingApi } from '@/apis/school.js'
+import { getUniversityDetailsApi,getSchoolInfoApi, getSchoolByTagsApi, getCategoryApi, getSchoolRankingApi,downloadRankingApi } from '@/apis/school.js'
 export const useSchoolStore = defineStore('school', () => {
     const categoryInfo = ref({})
     const allSchoolInfo = ref([])
     const schoolRankInfo = ref([])
     const downloadInfo = ref([])
+    const schoolDetail = ref({})
     //获取筛选数据
     const getCategory = async () => {
         const res = await getCategoryApi()
@@ -47,7 +48,12 @@ export const useSchoolStore = defineStore('school', () => {
         const res = await downloadRankingApi(data)
         downloadInfo.value = res.message
     }
-    return { allSchoolInfo, getSchoolInfo, getSchoolByTags, getCategory, categoryInfo, getSortedInfo, schoolRankInfo ,downloadInfo,downloadRanking}
+    //获取学校详情
+    const getUniversityDetails = async(name)=>{
+       const res = await getUniversityDetailsApi(name)
+       schoolDetail.value = res.message
+    }
+    return {schoolDetail,getUniversityDetails, allSchoolInfo, getSchoolInfo, getSchoolByTags, getCategory, categoryInfo, getSortedInfo, schoolRankInfo ,downloadInfo,downloadRanking}
 })
 
 

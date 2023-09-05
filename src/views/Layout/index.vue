@@ -1,8 +1,6 @@
 
 <script setup>
 import { onMounted } from 'vue'
-import { getCategoryApi, getSchoolInfoApi } from '@/apis/school'
-
 import LayoutFixed from './components/LayoutFixed.vue'
 import LayoutNav from './components/LayoutNav.vue'
 import LayoutMain from './components/LayoutMain.vue'
@@ -19,11 +17,12 @@ onMounted(async () => {
 })
 </script>
 <template>
-    <div class="w1200">
+    <div >
         <LayoutFixed></LayoutFixed>
-        <LayoutNav></LayoutNav>
-        <LayoutMain></LayoutMain>
-        <RouterView></RouterView>
+        <LayoutNav ></LayoutNav>
+        <LayoutMain class="w1200"></LayoutMain>
+        <hr>
+        <RouterView class="w1200"></RouterView>
         <LayoutFooter></LayoutFooter>
         <el-backtop :right="100" :bottom="100">
             <div><i class="iconfont icon-huidaodingbu" style="font-size: 40px;"></i></div>

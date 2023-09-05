@@ -3,7 +3,7 @@ import { getRecommendListApi, deleteListApi, getSaveListApi } from '@/apis/recom
 import { ref } from 'vue'
 export const useMyformStore = defineStore('myform', () => {
     //个人中心的左侧
-    const leftList = ref([{ name: '会员中心', path: '' }, { name: '个人资料', path: '/my' }, { name: '我的收藏', path: '/my/mycollect' }, { name: '我的志愿表', path: '/my/myform' }, { name: '我的订单', path: '' }, { name: '意见反馈', path: '' }, { name: '用户协议', path: '' }, { name: '隐私政策', path: '' }, { name: '联系客服', path: '' }])
+    const leftList = ref([{ name: '会员中心', path: '/my/myvip' }, { name: '个人资料', path: '/my' }, { name: '我的收藏', path: '/my/mycollect' }, { name: '我的志愿表', path: '/my/myform' }, { name: '我的订单', path: '' }, { name: '意见反馈', path: '' }, { name: '用户协议', path: '' }, { name: '隐私政策', path: '' }, { name: '联系客服', path: '' }])
     //个人中心左侧选中下标
     const i = ref(1)
     
