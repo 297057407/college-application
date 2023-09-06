@@ -323,7 +323,8 @@ const addCollectBtn = async (item_id) => {
 
 .left-box {
     // width: 800px;
-    width: 100%;
+    width: 1200px;
+    margin: 0 auto;
     padding-left: 20px;
 }
 

@@ -5,6 +5,8 @@ import { onMounted, ref, watch } from 'vue'
 import { useUserStore } from '@/stores/user'
 import { useSchoolStore } from '@/stores/school.js'
 import { useRecommendStore } from '@/stores/recommend.js'
+import { useMyformStore } from '@/stores/myform.js'
+const myformStore = useMyformStore()
 const schoolStore = useSchoolStore()
 const userStore = useUserStore()
 const recommendStore = useRecommendStore()
@@ -169,7 +171,8 @@ const initilize = async () => {
             "location": selected.value.location,
             "type": selected.value.type,
             "level": selected.value.level,
-            "tags": selected.value.tags
+            "tags": selected.value.tags,
+            "membership": userStore.loginInfo.membership
         })
         //当前志愿表信息
         current_form.value = {
@@ -205,6 +208,7 @@ onMounted(async () => {
             排名: form.value.score_rank,
             类型: `${form.value.exam_type}`
         }
+        if(!form.value.score)  dialogFormVisible.value = true
         await initilize()
     }
 })
@@ -249,19 +253,26 @@ const reset_btn = () => {
 }
 //将志愿表添加到我的志愿
 const add_btn = async () => {
-    if (JSON.stringify(recommendStore.recommendList) === '[]') ElMessage.warning('请先一键生成志愿表')
+    if (userStore.loginInfo.membership == '0') {
+        console.log(1);
+        ElMessage.warning('开通VIP后可使用')
+
+    }
     else {
-        const list = recommendStore.recommendList.map(v => {
-            return v.id
-        })
-        await recommendStore.addRecommend(
-            {
-                user_id: userStore.loginInfo.user_id,
-                list,
-                introduction: `分数: ${current_form.value.score} | 排名: ${current_form.value.rank} | 属地: ${current_form.value.location} | 院校类型: ${current_form.value.type} | 办学类型: ${current_form.value.level} | 特色: ${current_form.value.tags.join('/')}`
-            }
-        )
-        ElMessage.success('已添加至我的志愿')
+        if (JSON.stringify(recommendStore.recommendList) === '[]') ElMessage.warning('请先一键生成志愿表')
+        else {
+            const list = recommendStore.recommendList.map(v => {
+                return v.id
+            })
+            await recommendStore.addRecommend(
+                {
+                    user_id: userStore.loginInfo.user_id,
+                    list,
+                    introduction: `分数: ${current_form.value.score} | 排名: ${current_form.value.rank} | 属地: ${current_form.value.location} | 院校类型: ${current_form.value.type} | 办学类型: ${current_form.value.level} | 特色: ${current_form.value.tags.join('/')}`
+                }
+            )
+            ElMessage.success('已添加至我的志愿')
+        }
     }
 }
 </script>
@@ -326,11 +337,6 @@ const add_btn = async () => {
     </el-dialog>
     <div class="container">
         <div class="left-box">
-            <!-- <ul class="operation-info">
-                <li>一键生成</li>
-                <li>智能推荐</li>
-                <li>我的志愿表</li>
-            </ul> -->
             <div class="current-info">
                 <h4>当前信息</h4>
                 <ul class="info-body">
@@ -413,28 +419,38 @@ const add_btn = async () => {
                 <li>位次</li>
                 <li>专业名称</li>
             </ul>
-            <ul class="body-box">
-                <li v-for="(v, i) in recommendStore.recommendList" :key="v.id">
-                    <div class="div">{{ i + 1 }}</div>
-                    <div class="div">
-                        <span>{{ v.university }} </span>
-                        <span>院校代码: {{ v.university_code }}</span>
-                    </div>
-                    <div class="div">
-                        <span>{{ v.num_students }} 人</span>
-                    </div>
-                    <div class="div">
-                        <span>{{ v.score }} 分</span>
-                    </div>
-                    <div class="div">
-                        <span>第 {{ v.ranking }} 名</span>
-                    </div>
-                    <div class="div">
-                        <span>{{ v.major }}</span>
-                        <span>专业代码: {{ v.major_code }}</span>
-                    </div>
-                </li>
-            </ul>
+            <div class="mask-box">
+                <ul class="body-box">
+                    <li v-for="(v, i) in recommendStore.recommendList" :key="v.id">
+                        <div class="div">{{ i + 1 }}</div>
+                        <div class="div">
+                            <span>{{ v.university }} </span>
+                            <span>院校代码: {{ v.university_code }}</span>
+                        </div>
+                        <div class="div">
+                            <span>{{ v.num_students }} 人</span>
+                        </div>
+                        <div class="div">
+                            <span>{{ v.score }} 分</span>
+                        </div>
+                        <div class="div">
+                            <span>第 {{ v.ranking }} 名</span>
+                        </div>
+                        <div class="div">
+                            <span>{{ v.major }}</span>
+                            <span>专业代码: {{ v.major_code }}</span>
+                        </div>
+                    </li>
+                </ul>
+                <div class="mask" v-if="userStore.loginInfo.membership == '0'">
+                    <h1><i class="iconfont icon-lock"></i> <br> 请开通VIP解锁该功能 <div @click="myformStore.setIndex(0)">
+                            <RouterLink :to="'/my/myvip'">去开通 <i class="iconfont icon-icon-angle-right-dubble"></i>
+                            </RouterLink>
+                        </div>
+                    </h1>
+                </div>
+            </div>
+
         </div>
     </div>
 </template>
@@ -560,6 +576,39 @@ const add_btn = async () => {
     }
 
     .right-box {
+        position: relative;
+
+        .mask-box {
+            position: relative;
+
+            .mask {
+                width: 100%;
+                position: absolute;
+                background: linear-gradient(to bottom, rgba(180, 180, 180, 0), rgba(21, 13, 13, 0.7));
+                /* 渐变颜色和透明度 */
+                // pointer-events: none;
+                /* 避免遮挡页面内容 */
+                height: 365px;
+                top: 50px;
+                text-align: center;
+                padding-top: 100px;
+
+                i {
+                    font-size: 50px;
+                }
+
+                a {
+                    color: #74afee;
+                    font-size: 25px;
+
+                    i {
+                        font-size: 30px;
+                    }
+                }
+            }
+        }
+
+
 
         padding: 15px;
         flex: 1;
@@ -745,4 +794,5 @@ const add_btn = async () => {
 
 ::v-deep .el-checkbox-button:first-child .el-checkbox-button__inner {
     border: none;
-}</style>
+}
+</style>

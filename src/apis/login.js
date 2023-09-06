@@ -111,3 +111,12 @@ export const deleteUserApi = (data) => {
         data,
     })
 }
+
+//充值VIP
+export const addMembershipApi = (data) => {
+    return http({
+        url: '/user/addMembership',
+        method: 'POST',
+        data,
+    })
+}

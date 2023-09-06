@@ -3,18 +3,28 @@ import { ElLoading, ElMessage } from 'element-plus'
 import "element-plus/theme-chalk/el-loading.css";
 import 'element-plus/es/components/message/style/css'
 import { ref } from 'vue'
+import { useUserStore } from '@/stores/user.js'
+const userStore = useUserStore()
 const radio2 = ref('2')
 const loadEl = ref(null)
 const buyvip = async () => {
-    console.log(1);
+
+
     const loading = ElLoading.service({
         text: '支付中',
         target: loadEl.value
     })
-    await new Promise((resolved) => {
-        setTimeout(() => {
-            resolved()
-        }, 2000);
+
+    let nowDate = new Date()
+    if (radio2.value === '1') {
+        nowDate.setMonth(nowDate.getMonth() + 1)
+    } else if (radio2.value === '2') {
+        nowDate.setFullYear(nowDate.getFullYear() + 1)
+    }
+    let timestamp = new Date(nowDate).getTime()
+    await userStore.addMembership({
+        user_id: userStore.loginInfo.user_id,
+        timestamp: timestamp
     })
     ElMessage.success('支付成功')
     dialogFormVisible.value = false
@@ -41,12 +51,13 @@ const click_close = ref(false)
             <hr>
             <div class="vip-box">
                 <div class="novip">
-                    <h2>您未拥有VIP卡</h2>
-                    <div class="card">
+                    <h2 :class="{ 'viph2': userStore.loginInfo.membership == '1' }">{{ userStore.loginInfo.membership == '1' ?
+                        '您已拥有VIP卡' : '您未拥有VIP卡' }}</h2>
+                    <div class="card" v-if="userStore.loginInfo.membership == '1'">
                         <h3>志愿填报</h3>
                         <h1 style="font-size: 100px;">VIP</h1>
                         <div class="vip-text">
-                            有效期至: 2024-01-01
+                            有效期至: {{ new Date(userStore.loginInfo.expiration_time).toLocaleString() }}
                         </div>
                     </div>
                     <div style="padding-top: 50px;padding-left: 40px;margin-bottom: 50px;">
@@ -59,7 +70,8 @@ const click_close = ref(false)
                             </el-radio>
                         </el-radio-group>
                     </div>
-                    <button class="custom-btn" @click="dialogFormVisible = true">立即购买</button>
+                    <button class="custom-btn" @click="dialogFormVisible = true">{{ userStore.loginInfo.membership == '1' ?
+                        '续 费' : '立即购买' }}</button>
                 </div>
             </div>
         </div>
@@ -140,15 +152,10 @@ const click_close = ref(false)
 
     .right-box {
         flex: 1;
+        height: 600px;
 
         h1 {
             font-size: 26px;
-        }
-
-        .vip {
-            h2 {
-                color: #ff6b00;
-            }
         }
 
 
@@ -173,8 +180,11 @@ const click_close = ref(false)
                 color: #d7d7d7;
             }
 
+            .viph2 {
+                color: #ff6b00;
+            }
+
             width: 100%;
-            height: 300px;
             border-radius: 20px;
             position: relative;
 

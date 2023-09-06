@@ -104,7 +104,7 @@ onMounted(() => {
     window.addEventListener("scroll", centerChild);
 })
 onBeforeUnmount(() => {
-    window.removeEventListener("scroll", this.handleScroll);
+    window.removeEventListener("scroll", centerChild);
     if (timer.value) {
         clearTimeout(timer.value);
     }

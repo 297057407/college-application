@@ -16,7 +16,7 @@ onMounted(async () => {
     }
 })
 //跳转到志愿表详情
-const form_detail = (id,introduction) => {
+const form_detail = (id, introduction) => {
     router.push({
         path: `/my/myformdetail/${id}`, // 传递的参数
         query: {
@@ -41,8 +41,14 @@ const delete_form = async (index) => {
             <ul>
                 <li v-for="(v, i) in myformStore.form_list" :key="i" class="form_li"><span>编号: {{ v.index
                 }}</span><span>信息 : {{ v.introduction }}</span><span> <el-button type="primary"
-                            @click="form_detail(v.index,v.introduction)">查看志愿表</el-button> <el-button type="danger"
-                            @click="delete_form(v.index)">删除志愿表</el-button></span></li>
+                            @click="form_detail(v.index, v.introduction)">查看志愿表</el-button>
+
+                        <el-popconfirm title="确定退出？" @confirm="delete_form(v.index)">
+                            <template #reference>
+                               <el-button type="danger">删除志愿表</el-button>
+                            </template>
+                        </el-popconfirm>
+                    </span></li>
             </ul>
         </div>
         <div class="form_detail">
@@ -54,13 +60,15 @@ const delete_form = async (index) => {
 .form_container {
     width: 100%;
     padding: 30px 20px;
+
     .form_head {
         h2 {
-         color: #007bff;
-         padding-bottom: 20px;
-         border-bottom: 1px dotted #007bff;
+            color: #007bff;
+            padding-bottom: 20px;
+            border-bottom: 1px dotted #007bff;
         }
     }
+
     ul {
         border: 1px solid #cbc9c9;
         border-bottom: none;
