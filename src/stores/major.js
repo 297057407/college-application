@@ -1,5 +1,5 @@
 import { defineStore } from 'pinia'
-import { getAllTagsApi,getByTagsApi, getSortBySalaryApi, getSortByPeopleApi } from '@/apis/major'
+import { getAllTagsApi, getByTagsApi, getSortBySalaryApi, getSortByPeopleApi } from '@/apis/major'
 import { ref } from 'vue'
 export const useMajorStore = defineStore('major', () => {
     //筛选数据
@@ -22,6 +22,12 @@ export const useMajorStore = defineStore('major', () => {
     //     const res = await getMajorInfoApi()
     //     searchInfo.value = res
     // }
+
+    //设置allMajorInfo的值
+    const setSearchInfo = (data) => {
+        console.log(data);
+        searchInfo.value = data
+    }
     //根据默认对专业信息排序
     const getSearchInfoByTags = async (data) => {
         const res = await getByTagsApi(data)
@@ -31,6 +37,7 @@ export const useMajorStore = defineStore('major', () => {
     const getSortBySalary = async (data) => {
         const res = await getSortBySalaryApi(data)
         salarySortInfo.value = res
+        console.log(res);
     }
     //根据人气对专业信息排序
     const getSortByPeople = async (data) => {
@@ -59,7 +66,7 @@ export const useMajorStore = defineStore('major', () => {
     //     salarySortInfo.value = res
     // }
     return {
-        categoryInfo, getCategoryInfo, searchInfo, getSearchInfoByTags, getSortBySalary, salarySortInfo, getSortByPeople, peopleSortInfo
+        setSearchInfo, categoryInfo, getCategoryInfo, searchInfo, getSearchInfoByTags, getSortBySalary, salarySortInfo, getSortByPeople, peopleSortInfo
     }
 })
 

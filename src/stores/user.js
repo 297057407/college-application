@@ -7,6 +7,11 @@ export const useUserStore = defineStore('user', () => {
     const userInfo = ref({})
     const loginInfo = ref({})
     const provinceInfo = ref({})
+    const location = ref('')
+    //获取定位
+    const getLocation = (str) => {
+        location.value = str
+    }
     //登录
     const login = async (data) => {
         //获取省市
@@ -99,7 +104,7 @@ export const useUserStore = defineStore('user', () => {
         const res = await getMyRankApi(data)
         if (res.status === 'success') userInfo.value.score_rank = res.result
     }
-    return { addMembership, userInfo, login, register, addInformation, getInformation, getProvince, provinceInfo, exit, loginInfo, updateNickname, revisePassword, getUser, getMyRank, deleteUser }
+    return { getLocation,location,addMembership, userInfo, login, register, addInformation, getInformation, getProvince, provinceInfo, exit, loginInfo, updateNickname, revisePassword, getUser, getMyRank, deleteUser }
 }, {
     persist: true
 })

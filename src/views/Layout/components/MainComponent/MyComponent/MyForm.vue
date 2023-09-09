@@ -38,11 +38,10 @@ const delete_form = async (index) => {
     <div class="form_container">
         <div class="form_head">
             <h2>我的志愿表</h2>
-            <ul>
+            <ul v-if="myformStore.form_list.length">
                 <li v-for="(v, i) in myformStore.form_list" :key="i" class="form_li"><span>编号: {{ v.index
                 }}</span><span>信息 : {{ v.introduction }}</span><span> <el-button type="primary"
                             @click="form_detail(v.index, v.introduction)">查看志愿表</el-button>
-
                         <el-popconfirm title="确定退出？" @confirm="delete_form(v.index)">
                             <template #reference>
                                <el-button type="danger">删除志愿表</el-button>
@@ -50,6 +49,7 @@ const delete_form = async (index) => {
                         </el-popconfirm>
                     </span></li>
             </ul>
+            <el-empty description="空空如也~" v-else />
         </div>
         <div class="form_detail">
 
@@ -87,6 +87,7 @@ const delete_form = async (index) => {
 
             span:nth-child(2) {
                 flex: 3;
+                margin-right: 10px;
             }
 
             span:nth-child(3) {

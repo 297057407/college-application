@@ -8,20 +8,13 @@ import LayoutFooter from './components/LayoutFooter.vue'
 
 
 onMounted(async () => {
-    // const res = await getCategoryApi()
-    // console.log(res);
-    // const res2 = await getSchoolInfoApi()
-    // console.log(res2);
-    // const res3 = await getBySchoolNameApi("北京")
-    // console.log(res3);
 })
 </script>
 <template>
     <div >
         <LayoutFixed></LayoutFixed>
         <LayoutNav ></LayoutNav>
-        <LayoutMain class="w1200"></LayoutMain>
-        <hr>
+        <LayoutMain></LayoutMain>
         <RouterView class="w1200"></RouterView>
         <LayoutFooter></LayoutFooter>
         <el-backtop :right="100" :bottom="100">

@@ -36,9 +36,11 @@ onMounted(async () => {
         target: loadEl.value
     })
     //获取分类信息
-    await schoolStore.getCategory()
+    if (JSON.stringify(schoolStore.categoryInfo) === '{}')
+        await schoolStore.getCategory()
     // 获取学校数据
-    await schoolStore.getSortedInfo(value.value, page.value)
+    if (JSON.stringify(schoolStore.schoolRankInfo) === '[]')
+        await schoolStore.getSortedInfo(value.value, page.value)
     loading.close()
 })
 
@@ -176,7 +178,8 @@ const reset = async () => {
                     <div class="base-info flex-box">
                         <img style="width: 60px;
                         height: 60px;
-                      border-radius: 50%;" v-lazy="`https://p7571184p7.zicp.fun/img/picture/${v.name}.jpeg`|| ''" alt="">
+                      border-radius: 50%;" v-lazy="`https://p7571184p7.zicp.fun/img/picture/${v.name}.jpeg` || ''"
+                            alt="">
                         <div class="right">
                             <div class="right-info schoolname">{{ v.name }}</div>
                             <div class="right-info nature">{{ v.is_public }}</div>
@@ -196,7 +199,7 @@ const reset = async () => {
                     @current-change="handleCurrentChange" />
             </div>
             <!-- 空标签 -->
-            <el-empty description="啥也没搜到~" v-show="schoolStore.schoolRankInfo.message?.length === 0" />
+            <el-empty description="空空如也~" v-show="schoolStore.schoolRankInfo.message?.length === 0" />
         </div>
     </div>
 </template>

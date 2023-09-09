@@ -7,15 +7,23 @@ import { useUserStore } from '@/stores/user.js'
 const userStore = useUserStore()
 const radio2 = ref('2')
 const loadEl = ref(null)
+//立即购买
+const buyNow = () => {
+    if (!userStore.loginInfo.user_id)
+        ElMessage.warning('请先登录')
+    else dialogFormVisible.value = true
+}
 const buyvip = async () => {
-
-
     const loading = ElLoading.service({
         text: '支付中',
         target: loadEl.value
     })
-
-    let nowDate = new Date()
+    let nowDate = null
+    if (userStore.loginInfo.expiration_time === 0) {
+        nowDate = new Date()
+    } else {
+        nowDate = new Date(userStore.loginInfo.expiration_time)
+    }
     if (radio2.value === '1') {
         nowDate.setMonth(nowDate.getMonth() + 1)
     } else if (radio2.value === '2') {
@@ -51,7 +59,8 @@ const click_close = ref(false)
             <hr>
             <div class="vip-box">
                 <div class="novip">
-                    <h2 :class="{ 'viph2': userStore.loginInfo.membership == '1' }">{{ userStore.loginInfo.membership == '1' ?
+                    <h2 :class="{ 'viph2': userStore.loginInfo.membership == '1' }">{{ userStore.loginInfo.membership == '1'
+                        ?
                         '您已拥有VIP卡' : '您未拥有VIP卡' }}</h2>
                     <div class="card" v-if="userStore.loginInfo.membership == '1'">
                         <h3>志愿填报</h3>
@@ -70,7 +79,7 @@ const click_close = ref(false)
                             </el-radio>
                         </el-radio-group>
                     </div>
-                    <button class="custom-btn" @click="dialogFormVisible = true">{{ userStore.loginInfo.membership == '1' ?
+                    <button class="custom-btn" @click="buyNow">{{ userStore.loginInfo.membership == '1' ?
                         '续 费' : '立即购买' }}</button>
                 </div>
             </div>

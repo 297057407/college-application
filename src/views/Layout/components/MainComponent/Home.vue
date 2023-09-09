@@ -1,76 +1,100 @@
+
 <script setup>
-import { ref } from 'vue'
 import HotItem from '@/components/HotItem.vue';
 
+import { onMounted, ref } from 'vue'
+import { useSchoolStore } from '@/stores/school';
+import { useUserStore } from '@/stores/user';
+import { useNewsStore } from '@/stores/news';
+const schoolStore = useSchoolStore()
+const userStore = useUserStore()
+const newsStore = useNewsStore()
+// const imgArr = ["src/assets/images/c2.jpg", "src/assets/images/c3.jpg", "src/assets/images/c4.jpg"]
 
-const imgArr = ["src/assets/images/1.jpg", "src/assets/images/c2.jpg", "src/assets/images/c3.jpg", "src/assets/images/c4.jpg"]
+//随机生成9条数据
+const randomArticles = ref([])
+onMounted(async () => {
+    getRandomArticles()
+    await schoolStore.getHot(userStore.location)
+})
+const getRandomArticles = () => {
+    let set = new Set()
+    while (set.size < 9) {
+        let random = Math.floor(Math.random() * (newsStore.articles.length - 1 - 0 + 1) + 0)
+        set.add(random)
+    }
+    randomArticles.value = [...set]
+}
 
+//刷新热门院校
+const refreshschool = () => {
+    schoolStore.refresh()
+}
 
-// const activeName = ref('first')
-// const handleClick = (tab, event) => {
-//     console.log(tab, event)
-// }
-
-
+//学校详情
+const opendetail = ref(false)
+const openSchoolDetail = () => {
+    opendetail.value = true
+}
 </script>
 <template>
     <div class="countainer">
-        <div class="carousel-container">
-            <el-carousel indicator-position="outside" height="300px" :interval="3000" type="card">
-                <el-carousel-item v-for="(img, index) in imgArr" :key="index">
-                    <img :src="img" alt="">
-                </el-carousel-item>
-            </el-carousel>
+        <h1>让我们一起寻找您的完美选择，为您的未来赋能！</h1>
+        <br>
+        <div style="text-align: center;"><video src="@/assets/images/video.mp4" controls width="1000" height="560"
+                loop="true" muted="true" autoplay="true" controlsList="nodownload"></video></div>
+        <br>
+        <div class="hot-top">
+            <h2>热门院校</h2> <a @click="refreshschool" href="javascript:void(0)" class="fresh"><i
+                    class="iconfont icon-huanyipi"></i> 换一批</a>
         </div>
-    <div class="hot-top">
-        <h2>热门院校</h2> <a href="#" class="fresh"><i class="iconfont icon-huanyipi"></i> 换一批</a>
-    </div>
-    <section>
-        <div class="left-card">
-            <RouterLink to="/" class="item">
-                <img src="src/assets/images/140.jpg" alt="" />
-                <p class="name ellipsis">清华大学</p>
-                <p class="desc ellipsis">好学校</p>
-            </RouterLink>
-        </div>
-        <div class="right-cards">
-            <div class="right-card">
-                <HotItem></HotItem>
+        <section>
+            <div class="left-card" @click="openSchoolDetail(schoolStore.hotSchool[0])">
+                <RouterLink to="/" class="item">
+                    <img v-lazy="`https://p7571184p7.zicp.fun/img/picture/${schoolStore.hotSchool[0]?.name}.jpeg` || ''"
+                        alt="" />
+                    <p class="name ellipsis">{{ schoolStore.hotSchool[0]?.name }}</p>
+                    <p> <i style="color: red;" class="iconfont icon-renqiredu"></i> <span style="font-size: 16px;">热度: {{
+                        schoolStore.hotSchool[0]?.popularity }}</span> </p>
+                    <p class="desc ellipsis">{{ schoolStore.hotSchool[0]?.location }}</p>
+                </RouterLink>
             </div>
-            <div class="right-card">
-                <HotItem></HotItem>
+            <div class="right-cards">
+                <div class="right-card" @click="openSchoolDetail(v)" v-for="(v, i) in schoolStore.hotSchool.slice(1)"
+                    :key="i">
+                    <HotItem :item="v"></HotItem>
+                </div>
+                <!-- 可以添加更多次热门院校的卡片 -->
             </div>
-            <div class="right-card">
-                <HotItem></HotItem>
-            </div>
-            <div class="right-card">
-                <HotItem></HotItem>
-            </div>
-            <div class="right-card">
-                <HotItem></HotItem>
-            </div>
-            <div class="right-card">
-                <HotItem></HotItem>
-            </div>
+        </section>
+        <el-drawer z-index="9999" v-model="opendetail" title="学校详情" :with-header="false" direction="ttb">
 
-            <!-- 可以添加更多次热门院校的卡片 -->
+        </el-drawer>
+        <div class="hot-top">
+            <h2>高考资讯</h2> <a @click="getRandomArticles" href="javascript:void(0)" class="fresh"><i
+                    class="iconfont icon-huanyipi"></i> 换一批</a>
         </div>
-    </section>
-    <div class="hot-top">
-        <h2>高考资讯</h2> <a href="#" class="fresh"><i class="iconfont icon-huanyipi"></i> 换一批</a>
-    </div>
-    <section>
         <ul>
-            <li></li>
-            <li></li>
-            <li></li>
-            <li></li>
+            <li v-for="(v, i) in randomArticles" :key="i" class="article">
+                <RouterLink :to="{ path: '/news', query: { id: randomArticles[i] } }"> {{
+                    newsStore.articles[randomArticles[i]].head }}</RouterLink>
+            </li>
         </ul>
-    </section>
     </div>
-  
 </template>
 <style scoped lang="scss">
+h1 {
+    text-align: center;
+    max-width: 700px;
+    margin: 0 auto;
+    padding: 30px;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    margin-top: 20px;
+    font-style: italic;
+}
+
 .hot-top {
     padding-right: 55px;
     display: flex;
@@ -92,10 +116,28 @@ section {
     height: 315px;
     margin: 20px;
     display: flex;
+
     /* 使用 flex 布局 */
+
+}
+
+ul {
+    .article {
+        padding-left: 40px;
+        height: 60px;
+        line-height: 60px;
+        font-size: 20px;
+        border-bottom: 1px solid #adabab;
+
+        a:hover {
+            color: #007bff;
+        }
+    }
+
 }
 
 .left-card {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     flex: 1;
     /* 左边占用一定比例的空间 */
     background-color: #fff;
@@ -104,7 +146,7 @@ section {
     text-align: center;
 
     .item {
-        background-color: pink;
+        // background-color: pink;
         display: block;
         display: flex;
         flex-direction: column;
@@ -261,4 +303,5 @@ section {
 
 .el-carousel__item:nth-child(2n + 1) {
     background-color: #d3dce6;
-}</style>
+}
+</style>

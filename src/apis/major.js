@@ -13,7 +13,7 @@ export const getMajorInfoApi = () => {
     })
 }
 
-//根据筛选内容获取相应的专业信息
+//获取默认排序的专业信息
 export const getByTagsApi = (data) => {
     return http({
         url: '/major/getByTags',
@@ -31,7 +31,7 @@ export const getByTagsApi = (data) => {
 // }
 
 
-//根据薪酬排序
+//根据薪酬排序的专业信息
 export const getSortBySalaryApi = (data) => {
     return http({
         url: '/major/getByMoney',
@@ -49,7 +49,7 @@ export const getSortBySalaryApi = (data) => {
 //     })
 // }
 
-//根据人气排序
+//根据人气排序的专业信息
 export const getSortByPeopleApi = (data) => {
     return http({
         url: '/major/getByPeople',

@@ -34,9 +34,9 @@ const sendRequest = async () => {
         text: '玩命加载中...',
         target: loadoneEl.value
     })
-    if (rankRadio.value === '默认排序') await majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, 'search_name': search_name.value })
-    else if (rankRadio.value === '人气排序') await majorStore.getSortByPeople(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value, 'search_name': search_name.value }))
-    else if (rankRadio.value === '薪酬排序') await majorStore.getSortBySalary({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value, 'search_name': search_name.value })
+    if (rankRadio.value === '默认排序') await majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, 'search_name': search_name.value, page: currentPage3.value })
+    else if (rankRadio.value === '人气排序') await majorStore.getSortByPeople(({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWayPeople.value, 'search_name': search_name.value, page: currentPage2.value }))
+    else if (rankRadio.value === '薪酬排序') await majorStore.getSortBySalary({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, "sort": sortWay.value, 'search_name': search_name.value, page: currentPage3.value })
     loading.close()
 }
 const loadEl = ref(null)
@@ -48,9 +48,7 @@ onMounted(async () => {
         target: loadEl.value
     })
     //获取筛选数据 
-    if(JSON.stringify(majorStore.categoryInfo) === '{}') await majorStore.getCategoryInfo()
-    //获取默认排序的专业数据
-    await majorStore.getSearchInfoByTags({ "major_level": selected.value.major_level, "major_category": selected.value.major_category === '全部' ? '' : selected.value.major_category, "major_class": selected.value.major_class === '全部' ? '' : selected.value.major_class, 'search_name': search_name.value })
+    if (JSON.stringify(majorStore.categoryInfo) === '{}') await majorStore.getCategoryInfo()
     //获取收藏信息
     await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 0 })
     loading.close()
@@ -61,11 +59,17 @@ const btndisabled = ref(false)
 const searchBtn = async () => {
     if (btndisabled.value) return
     btndisabled.value = true
+    currentPage1.value = 1
+    currentPage2.value = 1
+    currentPage3.value = 1
     await sendRequest()
     btndisabled.value = false
 }
 //监听排序方式的变化
 watch(rankRadio, async () => {
+    currentPage1.value = 1
+    currentPage2.value = 1
+    currentPage3.value = 1
     await sendRequest()
 })
 //监听排序单选按钮变化
@@ -77,25 +81,28 @@ watch(sortWayPeople, async () => {
 })
 // 监听筛选选项变化
 watch(selected, async () => {
+    currentPage1.value = 1
+    currentPage2.value = 1
+    currentPage3.value = 1
     await sendRequest()
 }, {
     deep: true,
 })
 
-//默认排序的数据
-const defaultDate = computed(() => {
-    return majorStore.searchInfo.major_categories?.slice((5 * (currentPage1.value - 1)), (5 * currentPage1.value)) || []
-})
-//人气排序的数据
-const peopleDate = computed(() => {
-    if (Object.keys(majorStore.peopleSortInfo).length === 0) return []
-    return majorStore.peopleSortInfo.slice((10 * (currentPage2.value - 1)), (10 * currentPage2.value))
-})
-//薪酬排序的数据
-const salaryDate = computed(() => {
-    if (Object.keys(majorStore.salarySortInfo).length === 0) return []
-    return majorStore.salarySortInfo.slice((10 * (currentPage3.value - 1)), (10 * currentPage3.value))
-})
+// //默认排序的数据
+// const defaultDate = computed(() => {
+//     return majorStore.searchInfo.major_categories?.slice((5 * (currentPage1.value - 1)), (5 * currentPage1.value)) || []
+// })
+// //人气排序的数据
+// const peopleDate = computed(() => {
+//     if (Object.keys(majorStore.peopleSortInfo).length === 0) return []
+//     return majorStore.peopleSortInfo.slice((10 * (currentPage2.value - 1)), (10 * currentPage2.value))
+// })
+// //薪酬排序的数据
+// const salaryDate = computed(() => {
+//     if (Object.keys(majorStore.salarySortInfo).length === 0) return []
+//     return majorStore.salarySortInfo.slice((10 * (currentPage3.value - 1)), (10 * currentPage3.value))
+// })
 
 //取消收藏按钮
 const deleteCollectBtn = async (item_id) => {
@@ -168,11 +175,14 @@ const addCollectBtn = async (item_id) => {
                 <div ref="loadoneEl">
                     <!-- 内容显示 默认排序 -->
                     <div class="demo-collapse" v-if="rankRadio === '默认排序'">
-                        <div v-if="defaultDate.length">
+                        <!-- {{ majorStore.searchInfo.major_categories.length }} -->
+                        <!-- 空标签 -->
+                        <el-empty description="啥也没搜到~" v-if="!majorStore.searchInfo.major_categories?.length" />
+                        <div v-else>
                             <el-collapse>
-                                <el-collapse-item v-for="(value, index) in defaultDate" :title="value.category_name"
-                                    :key="index">
-                                    <div v-for="(item, index) in value.major_classes" :key="index">
+                                <el-collapse-item v-for="(value, index) in majorStore.searchInfo.major_categories"
+                                    :title="value.major_category" :key="index">
+                                    <div v-for="(item, index) in value.majors" :key="index">
                                         <h2 style="color: lightgreen;">{{ item.class_name }}</h2>
                                         <MajorPanel v-for="(v, i) in item.majors" :key="i" :item="v">
 
@@ -196,19 +206,17 @@ const addCollectBtn = async (item_id) => {
                                     @current-change="handleCurrentChange" :default-page-size="5" />
                             </div>
                         </div>
-                        <!-- 空标签 -->
-                        <el-empty description="啥也没搜到~" v-else />
                     </div>
                     <!-- 内容显示 人气排序 -->
                     <div v-if="rankRadio === '人气排序'">
-                        <div v-if="peopleDate.length">
+                        <div v-if="majorStore.peopleSortInfo.major_list.length">
                             <div style="margin: 10px 20px;float: right;">
                                 <el-radio-group v-model="sortWayPeople" size="small">
                                     <el-radio label="1" border>从高到低</el-radio>
                                     <el-radio label="0" border>从低到高</el-radio>
                                 </el-radio-group>
                             </div>
-                            <MajorPanel v-for="(v, i) in peopleDate" :key="i" :item="v">
+                            <MajorPanel v-for="(v, i) in majorStore.peopleSortInfo.major_list" :key="i" :item="v">
                                 <template #people>
                                     <span class="salary"> <i class="iconfont icon-renqiredu"></i> 人气值 : <i> {{ v.popularity
                                     }}</i></span>
@@ -231,11 +239,11 @@ const addCollectBtn = async (item_id) => {
                             </div>
                         </div>
                         <!-- 空标签 -->
-                        <el-empty description="啥也没搜到~" v-else />
+                        <el-empty description="空如也~" v-else />
                     </div>
                     <!-- 内容显示 薪酬排序 -->
                     <div v-if="rankRadio === '薪酬排序'">
-                        <div v-if="salaryDate.length">
+                        <div v-if="majorStore.salarySortInfo.major_list.length">
                             <div style="margin: 10px 20px;float: right;">
                                 <el-radio-group v-model="sortWay" size="small">
                                     <el-radio label="1" border>从高到低</el-radio>
@@ -243,7 +251,7 @@ const addCollectBtn = async (item_id) => {
                                 </el-radio-group>
                             </div>
                             <div>
-                                <MajorPanel v-for="(v, i) in salaryDate" :key="i" :item="v">
+                                <MajorPanel v-for="(v, i) in majorStore.salarySortInfo.major_list" :key="i" :item="v">
                                     <template #btn>
                                         <el-button
                                             v-if="collectStore.collectMajor.findIndex(val => val.item_id === v.major_id) !== -1"
@@ -261,7 +269,7 @@ const addCollectBtn = async (item_id) => {
                                     @current-change="handleCurrentChange" :default-page-size="10" />
                             </div>
                         </div>
-                        <!-- 空标签 -->
+                        <!-- 标签 -->
                         <el-empty description="啥也没搜到~" v-else />
                     </div>
                 </div>

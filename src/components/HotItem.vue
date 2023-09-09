@@ -8,23 +8,24 @@ defineProps({
 </script>
 <template>
   <RouterLink to="/" class="item">
-    <img src="src/assets/images/140.jpg" alt="" />
+
+    <div class="img"><img v-lazy="`https://p7571184p7.zicp.fun/img/picture/${item.name}.jpeg` || ''" alt="" /></div>
     <div class="p">
-      <p class="name ellipsis">清华大学</p>
-      <p class="desc ellipsis">好学校</p>
+      <p class="name ellipsis">{{ item.name }}</p>
+      <p class="desc ">{{ item.location }}</p>
+      <p> <i style="color: red;" class="iconfont icon-renqiredu"></i> <span style="font-size: 16px;">热度: {{
+        item.popularity }}</span> </p>
     </div>
   </RouterLink>
 </template>
 
 <style scoped lang="scss">
 .item {
-  display: block;
   display: flex;
-  justify-content: space-around;
   align-items: center;
   width: 100%;
   height: 100%;
-  padding: 20px 30px;
+  padding: 20px 0 20px 30px;
   text-align: center;
   transition: all .5s;
 
@@ -33,14 +34,25 @@ defineProps({
     box-shadow: 0 3px 8px rgb(0 0 0 / 20%);
   }
 
-  img {
+  .img {
     width: 64px;
     height: 64px;
+
+    img {
+      width: 64px;
+      height: 100%;
+    }
   }
 
-  p {
-    margin: 10px;
+  .p {
+    width: 80px;
+
+    p {
+      width: 130px;
+      padding: 5px 0px;
+    }
   }
+
 
   .name {
     font-size: 16px;

@@ -20,6 +20,9 @@ export default defineConfig({
       resolvers: [ElementPlusResolver()],
     }),
   ],
+  build : {
+    chunkSizeWarningLimit:1000,
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url))

@@ -9,7 +9,7 @@ const props = defineProps({
         <div class="info">
             <div class="info-top"><span class="info-name">{{ props.item.major_name}}</span><slot name="people"></slot>
             </div>
-            <div class="flex flex-wrap gap-2 my-2">
+            <div class="tags">
                 <el-tag>
                     专业代码:{{ props.item.major_code }}
                 </el-tag>
@@ -49,6 +49,15 @@ const props = defineProps({
         width: 700px;
         padding: 18px 10px;
         height: 100%;
+        .tags {
+            display: flex;
+            width: 475px;
+            flex-wrap: nowrap;
+            overflow: hidden;
+        }
+        .tags:hover {
+            overflow: visible;
+        }
         .info-top {
             .info-name {
                 font-size: 18px;
@@ -68,7 +77,10 @@ const props = defineProps({
     }
 
     .btn {
-        width: 300px;
+        display: flex;
+        justify-content: space-between;
+        width: 320px;
+        align-items: center;
     }
 
     .el-tag {

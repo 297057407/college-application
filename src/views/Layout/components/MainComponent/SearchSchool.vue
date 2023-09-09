@@ -8,9 +8,11 @@ import { useCollectStore } from '@/stores/collect.js'
 import { useUserStore } from '@/stores/user.js'
 import { ElLoading } from 'element-plus'
 import "element-plus/theme-chalk/el-loading.css";
+import { useRoute } from 'vue-router'
 const schoolStore = useSchoolStore()
 const collectStore = useCollectStore()
 const userStore = useUserStore()
+const route = useRoute()
 //搜索框
 const search_name = ref('')
 const selected = ref({
@@ -40,9 +42,6 @@ const searchBtn = () => {
 
 //分页
 const currentPage = ref(1)
-// const currentPageData = computed(() => {
-//     return schoolStore.allSchoolInfo.slice((10 * (currentPage.value - 1)), (10 * currentPage.value))
-// })
 //初始化
 onMounted(async () => {
     const loading = ElLoading.service({
@@ -51,9 +50,6 @@ onMounted(async () => {
     })
     //获取分类信息
     if (JSON.stringify(schoolStore.categoryInfo) === '{}') await schoolStore.getCategory()
-    //获取学校数据
-    // if (JSON.stringify(schoolStore.allSchoolInfo) === '[]') await schoolStore.getSchoolInfo()
-    await schoolStore.getSchoolByTags({ level: selected.value.level, location: selected.value.location, type: selected.value.type, tags: selected.value.tags.toString(), search_name: search_name.value, page: 1 })
     //获取收藏信息
     await collectStore.favoriteGet({ user_id: userStore.userInfo.user_id, item_type: 1 })
     loading.close()
@@ -113,7 +109,7 @@ const timer = ref(null)
 const parentContainer = ref(null)
 const childContainer = ref(null)
 const centerChild = () => {
-    if(!showDetail.value) return
+    if (!showDetail.value) return
     if (!timer.value) {
         timer.value = setTimeout(() => {
             const parent = parentContainer.value.getBoundingClientRect().y
@@ -215,8 +211,8 @@ const zhankai = ref(false)
                                 </el-pagination>
                             </div>
                         </div>
-                        <!-- 空标签 -->
-                        <el-empty description="啥也没搜到~" v-else />
+                        <!-- 标签 -->
+                        <el-empty description="空空如也~" v-else />
                     </div>
                 </el-tab-pane>
             </el-tabs>
@@ -235,7 +231,7 @@ const zhankai = ref(false)
                     <a href="javascript:void(0)" @click="zhankai = !zhankai" style="color:#409eff">查看详情</a>
 
 
-                    <el-drawer v-model="zhankai" title="学校简介" :with-header="false" direction="ltr">
+                    <el-drawer z-index="9999" v-model="zhankai" title="学校简介" :with-header="false" direction="ltr">
                         <span>{{ schoolStore.schoolDetail.introduction || '' }}</span>
                     </el-drawer>
 
@@ -342,6 +338,7 @@ const zhankai = ref(false)
         width: 100%;
         height: 700px;
         transition: all .5s;
+
         .address {
             display: flex;
             flex-direction: column;

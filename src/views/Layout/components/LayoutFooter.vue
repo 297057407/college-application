@@ -48,7 +48,8 @@
 <style scoped lang="scss">
 .footer {
     height: 200px;
-    background-color: #1e1e1e;
+    background-color: #f2f2f2; /* 与主体背景颜色保持一致 */
+    box-shadow: 0 -2px 4px rgba(0, 0, 0, 0.1); /* 在底部添加浅阴影效果 */
 
     .container {
         padding-top: 20px;
@@ -58,7 +59,7 @@
         justify-content: space-evenly;
 
         .nav {
-            color: #fff;
+            color: #666;
 
             h3 {
                 margin-bottom: 10px;

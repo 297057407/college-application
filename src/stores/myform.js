@@ -3,10 +3,10 @@ import { getRecommendListApi, deleteListApi, getSaveListApi } from '@/apis/recom
 import { ref } from 'vue'
 export const useMyformStore = defineStore('myform', () => {
     //个人中心的左侧
-    const leftList = ref([{ name: '会员中心', path: '/my/myvip' }, { name: '个人资料', path: '/my' }, { name: '我的收藏', path: '/my/mycollect' }, { name: '我的志愿表', path: '/my/myform' }, { name: '我的订单', path: '' }, { name: '意见反馈', path: '' }, { name: '用户协议', path: '' }, { name: '隐私政策', path: '' }, { name: '联系客服', path: '' }])
+    const leftList = ref([ { name: '个人资料', path: '/my/myinfo', icon: 'iconfont icon-wode' },{ name: '会员中心', path: '/my/myvip', icon: 'iconfont icon-huiyuan' }, { name: '我的收藏', path: '/my/mycollect', icon: 'iconfont icon-shoucang1' }, { name: '我的志愿表', path: '/my/myform', icon: 'iconfont icon-biaoge_o' }, { name: '联系客服', path: '/my/kefu', icon: 'iconfont icon-kefu' }])
     //个人中心左侧选中下标
-    const i = ref(1)
-    
+    const i = ref(0)
+
     const form_list = ref([])
     const form_detail = ref([])
     const current_form = ref([])
@@ -39,6 +39,6 @@ export const useMyformStore = defineStore('myform', () => {
 
     }
     return {
-        form_list, getList, deleteList, getSaveList, current_form, leftList,i,setIndex
+        form_list, getList, deleteList, getSaveList, current_form, leftList, i, setIndex
     }
 })

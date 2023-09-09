@@ -1,5 +1,9 @@
 <script setup>
 import { ref } from 'vue'
+import { useSchoolStore } from '@/stores/school';
+import { useMajorStore } from '@/stores/major';
+const majorStore = useMajorStore()
+const schoolStore = useSchoolStore()
 const arr = ref([
   {
     id: 1,
@@ -9,17 +13,18 @@ const arr = ref([
   {
     id: 2,
     path: '/fillform',
-    name: '模拟填报志愿',
+    name: '智能填报志愿',
   },
   {
     id: 3,
-    path: '/searchschool',
-    name: '查学校',
-  },
-  {
-    id: 4,
     path: '/searchmajor',
     name: '查专业',
+  },
+
+  {
+    id: 4,
+    path: '/searchschool',
+    name: '查学校',
   },
   {
     id: 5,
@@ -33,18 +38,25 @@ const arr = ref([
   },
 ])
 
-
+const goToSchool = async (id) => {
+  if (id == 3) {
+    //获取默认排序的专业数据
+    await majorStore.getSearchInfoByTags({ "major_level": '', "major_category": '', "major_class": '', 'search_name': '' })
+  }
+  if (id == 4) {
+    await schoolStore.getSchoolByTags({ level: '', location: '', type: '', tags: '', search_name: '', page: 1 })
+  }
+}
 </script>
 
 <template>
   <header class='header'>
     <div class="container">
       <ul class="header-nav">
-        <li class="home" v-for="item in arr" :key="item.id">
+        <li class="home" v-for="item in arr" :key="item.id" @click="goToSchool(item.id)">
           <RouterLink class="font-link" active-class="active" :to="`${item.path}`" exact-active-class="active">{{
             item.name }}</RouterLink>
         </li>
-        <li><a class="font-link" href="https://eduranking.cn/" target="_blank">易度大学排名</a></li>
       </ul>
     </div>
   </header>
@@ -54,51 +66,61 @@ const arr = ref([
 <style scoped lang='scss'>
 .header {
   background: #fff;
+  width: 100%;
+  border-bottom: 1px solid #c5c3c3;
+  margin-bottom: 30px;
 
   .container {
     width: 1200px;
+    margin: 0 auto;
     display: flex;
     align-items: center;
-    margin-bottom: 20px;
-  }
 
-  .header-nav {
-    display: flex;
-    position: relative;
-    z-index: 998;
+    .header-nav {
+      display: flex;
+      position: relative;
+      z-index: 998;
+      padding-left: 50px;
 
-    .font-link {
-      font-size: 20px;
-      font-weight: 700;
-      color: #007bff;
-      text-decoration: none;
-      transition: color 0.3s ease;
+      .font-link {
+        font-size: 20px;
+        font-weight: 700;
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.3s ease;
 
-    }
+      }
 
-    li {
-      margin-right: 40px;
-      width: 120px;
-      height: 100px;
-      line-height: 100px;
-      text-align: center;
+      .home {
+        margin-right: 10px;
+        width: 160px;
+        height: 100px;
+        line-height: 100px;
+        text-align: center;
+        padding-top: 20px;
 
-      a {
-        font-size: 16px;
-        line-height: 32px;
-        height: 32px;
-        display: inline-block;
+        a {
+          font-size: 26px;
+          line-height: 100px;
+          height: 80px;
+          display: inline-block;
 
-        &:hover {
-          border-bottom: 1px solid black;
+          &:hover {
+            border-bottom: 1px solid #007bff;
+          }
+        }
+
+        .active {
+          color: #ff5722;
+          border-bottom: 3px solid #ff5722;
         }
       }
 
-      .active {
-        color: #ff5722;
-      }
+
     }
+
   }
+
 
 
 }

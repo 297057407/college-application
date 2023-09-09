@@ -213,7 +213,7 @@ const confirm_btn = async () => {
     <el-dialog v-model="dialogFormVisible" title="请输入您的密码来注销账户" width="30%">
         <el-form :model="form">
             <el-form-item label="请输入密码" :label-width="formLabelWidth">
-                <el-input type="password"  v-model="depassword" autocomplete="off" />
+                <el-input type="password" v-model="depassword" autocomplete="off" />
             </el-form-item>
         </el-form>
         <template #footer>
@@ -347,6 +347,11 @@ const confirm_btn = async () => {
                         <el-button @click="resetForm(formEl)">重置</el-button>
                     </el-form-item>
                 </el-form>
+                <p style="color: #ff5722;">注意事项: 请确保提供的信息准确无误，因为这些信息将用于为您提供个性化的建议和推荐。
+                    如果您需要更新个人信息，可以随时返回到个人信息填写页面进行修改。
+                    如果您有任何疑问或需要进一步的帮助，请查看帮助中心或联系客户支持团队。
+                    填写个人信息是确保系统能够为您提供最准确的建议和推荐的重要步骤。这些信息将有助于我们更好地了解您的背景和需求，以便为您提供更好的体验和服务。感谢您的合作！
+                </p>
             </el-card>
         </div>
     </div>

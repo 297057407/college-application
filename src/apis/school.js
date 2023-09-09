@@ -14,16 +14,6 @@ export const getSchoolInfoApi = () => {
     })
 }
 
-//根据大学名字模糊查询
-// export const getBySchoolNameApi = (schoolName) => {
-//     return http({
-//         url: '/university/getBySchoolName',
-//         params: {
-//             schoolName
-//         },
-//     })
-// }
-
 //根据大学筛选条件查询
 export const getSchoolByTagsApi = (data) => {
     return http({
